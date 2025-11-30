@@ -34,7 +34,7 @@
                         </span>
                         <div class="media-body">
                             <p class="mb-1">Total Siswa</p>
-                            <h4 class="mb-0">{{ $totalSiswa }}</h4>
+                            <h4 class="mb-0">{{ $totalSiswa ?? 0 }}</h4>
                             <span>orang</span>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                         </span>
                         <div class="media-body">
                             <p class="mb-1">Total Kas</p>
-                            <h4 class="mb-0">Rp {{ number_format($totalKas, 0, ',', '.') }}</h4>
+                            <h4 class="mb-0">@if(is_null($totalKas)) — @else Rp {{ number_format($totalKas, 0, ',', '.') }} @endif</h4>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                         </span>
                         <div class="media-body">
                             <p class="mb-1">Pendapatan ({{ $rangeLabel }})</p>
-                            <h4 class="mb-0 text-success">Rp {{ number_format($pemasukanRange, 0, ',', '.') }}</h4>
+                            <h4 class="mb-0 text-success">@if(is_null($pemasukanRange)) — @else Rp {{ number_format($pemasukanRange, 0, ',', '.') }} @endif</h4>
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                         </span>
                         <div class="media-body">
                             <p class="mb-1">Pengeluaran ({{ $rangeLabel }})</p>
-                            <h4 class="mb-0 text-danger">Rp {{ number_format($pengeluaranRange, 0, ',', '.') }}</h4>
+                            <h4 class="mb-0 text-danger">@if(is_null($pengeluaranRange)) — @else Rp {{ number_format($pengeluaranRange, 0, ',', '.') }} @endif</h4>
                         </div>
                     </div>
                 </div>
