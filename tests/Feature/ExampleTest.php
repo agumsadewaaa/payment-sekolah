@@ -14,6 +14,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // Home requires auth so a guest will be redirected to login
+        $response->assertStatus(302);
     }
 }
