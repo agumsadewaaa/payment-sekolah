@@ -30,6 +30,9 @@ class HomeController extends Controller
                          ELSE 0 END) AS saldo
             "))->value('saldo');
 
+        // make sure we always have numeric value (if DB returned null)
+        $totalKas = is_null($totalKas) ? 0 : $totalKas;
+
         // ===== 3) DATA BERDASARKAN RANGE (untuk kartu & grafik) =====
         $kasPerHari = DB::table('tb_kas_sekolah')
             ->select(
@@ -42,8 +45,8 @@ class HomeController extends Controller
             ->orderBy('tgl')
             ->get();
 
-        $pemasukanRange   = (int) $kasPerHari->sum('pemasukan');
-        $pengeluaranRange = (int) $kasPerHari->sum('pengeluaran');
+        $pemasukanRange   = $kasPerHari->isEmpty() ? 0 : (int) $kasPerHari->sum('pemasukan');
+        $pengeluaranRange = $kasPerHari->isEmpty() ? 0 : (int) $kasPerHari->sum('pengeluaran');
 
         // Buat label harian lengkap agar bar/line sejajar
         $period = new \DatePeriod($start->copy()->startOfDay(), new \DateInterval('P1D'), $end->copy()->addDay());
@@ -93,12 +96,20 @@ class HomeController extends Controller
             ->having('progress','<',50)
             ->get();
 
+        if ($siswaProgress->isEmpty()) {
+            $siswaProgress = null;
+        }
+
         // ===== 5) Latest pengeluaran (tetap) =====
         $latestPengeluaran = DB::table('tb_kas_sekolah')
             ->where('tipe',2)
             ->orderBy('tanggal','desc')
             ->limit(5)
             ->get(['tanggal','catatan','nominal']);
+
+        if ($latestPengeluaran->isEmpty()) {
+            $latestPengeluaran = null;
+        }
 
         return view('home', compact(
             'totalSiswa',
