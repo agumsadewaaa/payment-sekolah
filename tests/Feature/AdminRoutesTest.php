@@ -3,14 +3,18 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-// Avoid running project migrations inside tests to keep them fast and isolated
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AdminRoutesTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_admin_can_access_admin_page()
     {
-        $admin = User::factory()->make(['role' => 'admin']);
+        Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $admin->assignRole('admin');
 
         $this->app['router']->get('/admin', function () {
             return response('admin page');
@@ -22,7 +26,7 @@ class AdminRoutesTest extends TestCase
 
     public function test_non_admin_redirects_forbidden_admin_page()
     {
-        $user = User::factory()->make(['role' => 'student']);
+        $user = User::factory()->create(['role' => 'student']);
 
         $this->app['router']->get('/admin', function () {
             return response('admin page');

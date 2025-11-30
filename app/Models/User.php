@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -45,25 +46,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Check if the user has the given role.
-     */
-    public function hasRole(string $role): bool
-    {
-        return (string)$this->role === $role;
-    }
-
-    /**
-     * Assign a role to the user (simple setter for the column).
-     */
-    public function assignRole(string $role): self
-    {
-        $this->role = $role;
-        $this->save();
-        return $this;
-    }
-
-    /**
-     * Helper to check admin role
+     * Helper to check admin role via Spatie's hasRole method.
      */
     public function isAdmin(): bool
     {

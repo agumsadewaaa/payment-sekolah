@@ -66,5 +66,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // simple role-based middleware (usage: ->middleware('role:admin') or 'role:admin,teacher')
         'role' => \App\Http\Middleware\CheckRole::class,
+        // spatie permissions middleware alias (use ->middleware('permission:edit articles'))
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
     ];
 }

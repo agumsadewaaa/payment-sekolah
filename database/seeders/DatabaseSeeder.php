@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(
             [
+                // migrate legacy user.role values into the roles table first,
+                // then ensure admin user exists and has role assigned
+                MigrateUserRolesSeeder::class,
                 AdminUserSeeder::class,
             ]
         );

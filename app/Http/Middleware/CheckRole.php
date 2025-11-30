@@ -26,9 +26,17 @@ class CheckRole
 
         $user = Auth::user();
 
-        foreach ($allowed as $role) {
-            if (method_exists($user, 'hasRole') ? $user->hasRole($role) : ($user->role === $role)) {
+        // If the Spatie trait is available prefer the hasAnyRole helper (can evaluate array)
+        if (method_exists($user, 'hasAnyRole')) {
+            if ($user->hasAnyRole($allowed)) {
                 return $next($request);
+            }
+        } else {
+            // fallback to older single-string role column checks
+            foreach ($allowed as $role) {
+                if (method_exists($user, 'hasRole') ? $user->hasRole($role) : ($user->role === $role)) {
+                    return $next($request);
+                }
             }
         }
 
