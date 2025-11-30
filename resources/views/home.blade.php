@@ -119,7 +119,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($siswaProgress as $siswa)
+                            @if(is_null($siswaProgress) || $siswaProgress->isEmpty())
+                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
+                            @else
+                                @foreach($siswaProgress as $siswa)
                                 <tr>
                                     <td>{{ $siswa->nama }}</td>
                                     <td>{{ $siswa->kode }}</td>
@@ -130,9 +133,7 @@
                                         <small>{{ $siswa->progress }}%</small>
                                     </td>
                                 </tr>
-                            @endforeach
-                            @if($siswaProgress->isEmpty())
-                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
+                                @endforeach
                             @endif
                         </tbody>
                     </table>
@@ -154,15 +155,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($latestPengeluaran as $out)
+                            @if(is_null($latestPengeluaran) || $latestPengeluaran->isEmpty())
+                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
+                            @else
+                                @foreach($latestPengeluaran as $out)
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($out->tanggal)->format('d-M-Y') }}</td>
                                     <td>{{ $out->catatan }}</td>
                                     <td class="text-danger">Rp {{ number_format($out->nominal, 0, ',', '.') }}</td>
                                 </tr>
-                            @endforeach
-                            @if($latestPengeluaran->isEmpty())
-                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
+                                @endforeach
                             @endif
                         </tbody>
                     </table>
@@ -178,9 +180,9 @@
 <script>
     const ctx = document.getElementById('kasChart').getContext('2d');
 
-    const labels   = {!! json_encode($tanggalBulan) !!};
-    const pemasukan = {!! json_encode($dataPemasukan) !!};
-    const pengeluaran = {!! json_encode($dataPengeluaran) !!};
+    const labels   = {!! json_encode($tanggalBulan ?? []) !!};
+    const pemasukan = {!! json_encode($dataPemasukan ?? []) !!};
+    const pengeluaran = {!! json_encode($dataPengeluaran ?? []) !!};
 
     new Chart(ctx, {
         data: {
