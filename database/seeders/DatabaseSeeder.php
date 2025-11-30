@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
                 // then ensure admin user exists and has role assigned
                 MigrateUserRolesSeeder::class,
                 AdminUserSeeder::class,
+                KelasSeeder::class,
             ]
         );
     }
