@@ -84,7 +84,8 @@ class TagihanController extends AppBaseController
             return redirect(route('tagihans.index'));
         }
 
-        return view('tagihans.edit')->with('tagihan', $tagihan);
+        $kelas = \App\Models\Kelas::orderBy('kode', 'asc')->pluck('kode', 'id');
+        return view('tagihans.edit', compact('tagihan', 'kelas'));
     }
 
     /**

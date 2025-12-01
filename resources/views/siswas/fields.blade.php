@@ -38,6 +38,12 @@
     ]) !!}
 </div>
 
+<!-- Kode Kelas Field (Read-only, auto-generated) -->
+<div class="form-group col-sm-6">
+    {!! Form::label('kode_kelas', 'Kode Kelas:') !!}
+    {!! Form::text('kode_kelas', null, ['class' => 'form-control', 'readonly', 'id' => 'kode_kelas', 'placeholder' => 'Auto-generated']) !!}
+</div>
+
 <!-- Tahun Masuk Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('tahun_masuk', 'Tahun Masuk:') !!}<span class="text-danger">*</span>
@@ -59,11 +65,13 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
+        // Untuk populate jurusan ketika kelas berubah
         $('#kelas').on('change', function() {
             var kelas = $(this).val();
 
             // reset dulu jurusan biar ada feedback
             $('#jurusan').empty().append('<option value="">Loading...</option>');
+            $('#kode_kelas').val('');
 
             if (kelas) {
                 $.get('/get-jurusan/' + kelas, function(data) {
@@ -71,14 +79,47 @@
                     $.each(data, function(id, nama) {
                         $('#jurusan').append('<option value="' + id + '">' + nama + '</option>');
                     });
+                    
                     // kalau jurusan pakai bootstrap-select
-                    $('#jurusan').selectpicker('refresh');
+                    if ($.fn.selectpicker) {
+                        $('#jurusan').selectpicker('refresh');
+                    }
+                    
+                    // Auto-select jurusan jika sudah ada nilai sebelumnya (saat edit)
+                    @if(isset($siswa) && $siswa->jurusan)
+                        $('#jurusan').val('{{ $siswa->jurusan }}');
+                        if ($.fn.selectpicker) {
+                            $('#jurusan').selectpicker('refresh');
+                        }
+                        // Trigger change untuk update kode kelas
+                        $('#jurusan').trigger('change');
+                    @endif
                 });
             } else {
                 $('#jurusan').empty().append('<option value="">Pilih jurusan</option>');
-                $('#jurusan').selectpicker('refresh');
+                if ($.fn.selectpicker) {
+                    $('#jurusan').selectpicker('refresh');
+                }
             }
         });
+
+        // Update kode kelas ketika jurusan dipilih
+        $('#jurusan').on('change', function() {
+            var kelasVal = $('#kelas').val();
+            var jurusanId = $(this).val();
+            var jurusanText = $('#jurusan option:selected').text();
+
+            if (kelasVal && jurusanId && jurusanText !== 'Pilih jurusan' && jurusanText !== 'Loading...') {
+                $('#kode_kelas').val(kelasVal + '-' + jurusanText);
+            } else {
+                $('#kode_kelas').val('');
+            }
+        });
+
+        // Trigger auto-load jurusan saat edit (ketika kelas sudah terisi)
+        @if(isset($siswa) && $siswa->kelas)
+            $('#kelas').trigger('change');
+        @endif
     });
 </script>
 @endpush
