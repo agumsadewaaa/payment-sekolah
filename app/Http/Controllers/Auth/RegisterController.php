@@ -68,7 +68,7 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             // default role for new registrations
-            'role' => 'student',
+            'role' => 'user',
         ]);
     }
 }

@@ -21,6 +21,8 @@ class KasSekolahController extends AppBaseController
     public function __construct(KasSekolahRepository $kasSekolahRepo)
     {
         $this->kasSekolahRepository = $kasSekolahRepo;
+        // only admin may create / edit / delete kas sekolah
+        $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

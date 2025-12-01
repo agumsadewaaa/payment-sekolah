@@ -8,10 +8,11 @@
                     <h1>Kelas</h1>
                 </div>
                 <div class="col-sm-6">
-                    <a class="btn btn-primary float-right"
-                       href="{{ route('kelas.create') }}">
-                        Add New
-                    </a>
+                    @role('admin')
+                        <a class="btn btn-primary float-right" href="{{ route('kelas.create') }}">
+                            Add New
+                        </a>
+                    @endrole
                 </div>
             </div>
         </div>

@@ -28,11 +28,12 @@
                                class='btn btn-default btn-xs'>
                                 <i class="far fa-eye"></i>
                             </a>
-                            <a href="{{ route('kas-sekolahs.edit', [$kasSekolah->id]) }}"
-                               class='btn btn-default btn-xs'>
-                                <i class="far fa-edit"></i>
-                            </a>
-                            {!! Form::button('<i class="far fa-trash-alt"></i>', ['type' => 'submit', 'class' => 'btn btn-danger btn-xs', 'onclick' => "return confirm('Are you sure?')"]) !!}
+                            @role('admin')
+                                <a href="{{ route('kas-sekolahs.edit', [$kasSekolah->id]) }}" class='btn btn-default btn-xs'>
+                                    <i class="far fa-edit"></i>
+                                </a>
+                                {!! Form::button('<i class="far fa-trash-alt"></i>', ['type' => 'submit', 'class' => 'btn btn-danger btn-xs', 'onclick' => "return confirm('Are you sure?')"]) !!}
+                            @endrole
                         </div>
                         {!! Form::close() !!}
                     </td>

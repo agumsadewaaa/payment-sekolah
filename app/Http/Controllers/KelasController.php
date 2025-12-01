@@ -17,6 +17,8 @@ class KelasController extends AppBaseController
     public function __construct(KelasRepository $kelasRepo)
     {
         $this->kelasRepository = $kelasRepo;
+        // only admin can create/update/delete kelas
+        $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

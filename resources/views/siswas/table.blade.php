@@ -57,16 +57,18 @@
                             <a href="{{ route('siswas.show', $siswa->id) }}" class='btn btn-default btn-xs'>
                                 <i class="far fa-eye"></i>
                             </a>
-                            <a href="{{ route('siswas.edit', $siswa->id) }}" class='btn btn-default btn-xs'>
-                                <i class="far fa-edit"></i>
-                            </a>
-                            {!! Form::open(['route' => ['siswas.destroy', $siswa->id], 'method' => 'delete', 'style' => 'display:inline']) !!}
-                                {!! Form::button('<i class="far fa-trash-alt"></i>', [
-                                    'type' => 'submit',
-                                    'class' => 'btn btn-danger btn-xs',
-                                    'onclick' => "return confirm('Are you sure?')"
-                                ]) !!}
-                            {!! Form::close() !!}
+                            @role('admin')
+                                <a href="{{ route('siswas.edit', $siswa->id) }}" class='btn btn-default btn-xs'>
+                                    <i class="far fa-edit"></i>
+                                </a>
+                                {!! Form::open(['route' => ['siswas.destroy', $siswa->id], 'method' => 'delete', 'style' => 'display:inline']) !!}
+                                    {!! Form::button('<i class="far fa-trash-alt"></i>', [
+                                        'type' => 'submit',
+                                        'class' => 'btn btn-danger btn-xs',
+                                        'onclick' => "return confirm('Are you sure?')"
+                                    ]) !!}
+                                {!! Form::close() !!}
+                            @endrole
                         </div>
                     </td>
                 </tr>

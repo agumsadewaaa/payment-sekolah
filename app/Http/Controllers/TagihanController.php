@@ -17,6 +17,8 @@ class TagihanController extends AppBaseController
     public function __construct(TagihanRepository $tagihanRepo)
     {
         $this->tagihanRepository = $tagihanRepo;
+        // only admin can manage tagihan (create / update / destroy)
+        $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

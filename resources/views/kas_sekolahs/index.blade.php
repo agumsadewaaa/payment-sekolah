@@ -23,7 +23,9 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">List Kas Sekolah</h4>
-                        <a class="btn btn-primary float-right" href="{{ route('kas-sekolahs.create') }}">Add New</a>
+                        @role('admin')
+                            <a class="btn btn-primary float-right" href="{{ route('kas-sekolahs.create') }}">Add New</a>
+                        @endrole
                     </div>
                     @include('kas_sekolahs.table')
                 </div>
