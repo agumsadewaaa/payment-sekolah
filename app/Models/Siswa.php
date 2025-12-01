@@ -38,6 +38,15 @@ class Siswa extends Model
         return $this->belongsTo(Kelas::class, 'jurusan', 'id');
     }
 
+    protected $casts = [
+        'id' => 'integer',
+        'nisn' => 'integer',
+        'kelas' => 'integer',
+        'jurusan' => 'integer',
+        'tahun_masuk' => 'integer',
+        'tahun_lulus' => 'integer'
+    ];
+
     // Relasi: Siswa -> Tagihan (via jurusan/kelas)
     public function tagihans()
     {

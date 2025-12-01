@@ -33,6 +33,9 @@ class ActivityLoggingTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
+        // create required Kelas and a siswa
+        $kelas = \App\Models\Kelas::create(['kode' => 'X-LOG', 'kelas' => '10', 'jurusan' => 'RPL']);
+
         // create a siswa
         $this->actingAs($admin)
             ->post('/siswas', [
@@ -40,7 +43,7 @@ class ActivityLoggingTest extends TestCase
                 'nisn' => '999999999',
                 'kontak_ortu' => '0812345678',
                 'kelas' => '10',
-                'jurusan' => 'RPL',
+                'jurusan' => $kelas->id,
                 'tahun_masuk' => 2025,
                 'tahun_lulus' => null,
                 'status_siswa' => 'Aktif'

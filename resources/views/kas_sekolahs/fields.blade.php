@@ -94,7 +94,7 @@
     <div class="input-group">
         <span class="input-group-text">Rp</span>
         {!! Form::text('nominal', null, [
-            'class' => 'form-control',
+            'class' => 'form-control nominal',
             'id' => 'nominal',
             'placeholder' => 'Masukkan nominal',
             'required'
@@ -135,17 +135,11 @@ document.addEventListener("DOMContentLoaded", function () {
     tipeSelect.addEventListener('change', toggleForm);
     toggleForm();
 
-    // 🔥 Format nominal input aman
-    nominalInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        e.target.value = value ? new Intl.NumberFormat('id-ID').format(value) : '';
-    });
-
-    // 🔥 Bersihkan nominal sebelum submit
-    $('form').on('submit', function() {
-        $('#nominal').val($('#nominal').val().replace(/\D/g, ''));
-    });
+    // formatting for nominal inputs is handled via shared partial
 });
+
+// include central nominal formatting script
+@include('partials.nominal-input')
 
 $(document).ready(function() {
     // Kelas -> siswa

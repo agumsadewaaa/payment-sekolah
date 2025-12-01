@@ -25,7 +25,8 @@ class Tagihan extends Model
 
     public function siswas()
     {
-        return $this->hasMany(Siswa::class, 'kelas', 'kelas');
+        // Tagihan.kelas stores tb_kelas.id, and Siswa.jurusan will be the FK to tb_kelas.id
+        return $this->hasMany(Siswa::class, 'jurusan', 'kelas');
     }
 
     public function kasSiswa()

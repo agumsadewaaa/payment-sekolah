@@ -63,14 +63,16 @@ class ResourceAccessTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $admin->assignRole('admin');
 
-        // create new siswa (admin)
+        // create Kelas for siswa jurusan and then create new siswa (admin)
+        $kelas = \App\Models\Kelas::create(['kode' => 'RC-1', 'kelas' => '10', 'jurusan' => 'TKJ']);
+
         $this->actingAs($admin)
             ->post('/siswas', [
                 'nama' => 'Test Siswa',
                 'nisn' => '1234567890',
                 'kontak_ortu' => '0812345678',
                 'kelas' => '10',
-                'jurusan' => 'TKJ',
+                'jurusan' => $kelas->id,
                 'tahun_masuk' => 2025,
                 'tahun_lulus' => null,
                 'status_siswa' => 'Aktif'
