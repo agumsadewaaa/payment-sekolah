@@ -1,8 +1,5 @@
-<!-- Kode Field -->
-<div class="form-group col-sm-12">
-    {!! Form::label('kode', 'Kode:') !!}
-    {!! Form::text('kode', null, ['class' => 'form-control', 'required', 'readonly', 'id' => 'kode', 'placeholder' => 'Auto-generated dari Kelas + Jurusan']) !!}
-</div>
+<!-- Kode Field (Hidden, auto-generated) -->
+{!! Form::hidden('kode', null, ['id' => 'kode']) !!}
 
 <!-- Kelas Field -->
 <div class="form-group col-sm-6">

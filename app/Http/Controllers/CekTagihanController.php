@@ -25,8 +25,32 @@ class CekTagihanController extends Controller
                         ->first();
 
             if ($siswa) {
-                $tagihans = Tagihan::where('kelas', $siswa->jurusan)->get()->map(function ($tagihan) use ($siswa) {
-                    // Ambil semua pembayaran siswa untuk tagihan ini
+                // 1. Ambil tagihan kelas saat ini
+                $tagihanKelasSaatIni = Tagihan::where('kelas', $siswa->jurusan)->pluck('id');
+
+                // 2. Ambil tagihan dari kelas lama yang BELUM LUNAS (carry-over)
+                $tagihanBelumLunasKelasLama = KasSiswa::where('siswa_id', $siswa->id)
+                    ->select('tagihan_id')
+                    ->groupBy('tagihan_id')
+                    ->get()
+                    ->filter(function($kas) {
+                        // Cek apakah tagihan ini sudah lunas
+                        $tagihan = Tagihan::find($kas->tagihan_id);
+                        if (!$tagihan) return false;
+                        
+                        $totalBayar = KasSiswa::where('siswa_id', $kas->siswa_id)
+                            ->where('tagihan_id', $kas->tagihan_id)
+                            ->sum('nominal');
+                        
+                        // Hanya ambil yang belum lunas
+                        return $totalBayar < $tagihan->nominal;
+                    })
+                    ->pluck('tagihan_id');
+
+                // Gabungkan tagihan kelas saat ini + carry-over belum lunas
+                $allTagihanIds = $tagihanKelasSaatIni->merge($tagihanBelumLunasKelasLama)->unique();
+
+                $tagihans = Tagihan::whereIn('id', $allTagihanIds)->get()->map(function ($tagihan) use ($siswa) {
                     $pembayaran = KasSiswa::where('siswa_id', $siswa->id)
                         ->where('tagihan_id', $tagihan->id)
                         ->whereNull('deleted_at')
@@ -42,15 +66,29 @@ class CekTagihanController extends Controller
                         'total_bayar'  => $totalBayar,
                         'sisa'         => $sisa > 0 ? $sisa : 0,
                         'status'       => $sisa <= 0 ? 'Lunas' : 'Belum Lunas',
-                        'pembayaran'   => $pembayaran, // ✅ masukkan riwayat pembayaran
+                        'pembayaran'   => $pembayaran,
                     ];
                 });
             }
 
             // Hitung progress
-            $totalTagihan = $tagihans->sum('nominal');
-            $totalBayar   = $tagihans->sum('total_bayar');
-            $progress     = $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
+            // Total tagihan = tagihan kelas saat ini (penuh) + sisa tagihan kelas lama
+            $tagihanKelasSaatIni = Tagihan::where('kelas', $siswa->jurusan)->pluck('id');
+            $totalTagihanKelasSaatIni = Tagihan::where('kelas', $siswa->jurusan)->sum('nominal');
+            
+            // Hitung sisa dari tagihan kelas lama (carry-over)
+            $sisaTagihanKelasLama = $tagihans->filter(function($t) use ($tagihanKelasSaatIni) {
+                return !$tagihanKelasSaatIni->contains($t['id']); // bukan tagihan kelas saat ini
+            })->sum('sisa');
+            
+            $totalTagihan = $totalTagihanKelasSaatIni + $sisaTagihanKelasLama;
+            
+            // Total bayar = hanya pembayaran untuk tagihan kelas saat ini
+            $totalBayar = KasSiswa::where('siswa_id', $siswa->id)
+                ->whereIn('tagihan_id', $tagihanKelasSaatIni)
+                ->sum('nominal');
+            
+            $progress = $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
         } else {
             $progress = 0;
             $totalTagihan = 0;
@@ -65,7 +103,31 @@ class CekTagihanController extends Controller
     {
         $siswa = Siswa::findOrFail($id);
 
-        $tagihans = Tagihan::where('kelas', $siswa->jurusan)  
+        // 1. Ambil tagihan kelas saat ini
+        $tagihanKelasSaatIni = Tagihan::where('kelas', $siswa->jurusan)->pluck('id');
+
+        // 2. Ambil tagihan dari kelas lama yang BELUM LUNAS (carry-over)
+        $tagihanBelumLunasKelasLama = KasSiswa::where('siswa_id', $siswa->id)
+            ->select('tagihan_id')
+            ->groupBy('tagihan_id')
+            ->get()
+            ->filter(function($kas) use ($siswa) {
+                $tagihan = Tagihan::find($kas->tagihan_id);
+                if (!$tagihan) return false;
+                
+                $totalBayar = KasSiswa::where('siswa_id', $siswa->id)
+                    ->where('tagihan_id', $kas->tagihan_id)
+                    ->sum('nominal');
+                
+                // Hanya ambil yang belum lunas
+                return $totalBayar < $tagihan->nominal;
+            })
+            ->pluck('tagihan_id');
+
+        // Gabungkan tagihan kelas saat ini + carry-over belum lunas
+        $allTagihanIds = $tagihanKelasSaatIni->merge($tagihanBelumLunasKelasLama)->unique();
+
+        $tagihans = Tagihan::whereIn('id', $allTagihanIds)
             ->orderBy('tagihan')
             ->get(['id','tagihan','nominal']);
 
@@ -77,7 +139,7 @@ class CekTagihanController extends Controller
             ->pluck('total','tagihan_id'); // [tagihan_id => total_bayar]
 
         // bentuk item
-        $items = $tagihans->map(function ($t) use ($bayarPerTagihan) {
+        $items = $tagihans->map(function ($t) use ($bayarPerTagihan, $siswa, $tagihanKelasSaatIni) {
             $totalBayar = (int) ($bayarPerTagihan[$t->id] ?? 0);
             $sisa = max(0, (int)$t->nominal - $totalBayar);
 
@@ -88,6 +150,7 @@ class CekTagihanController extends Controller
                 'total_bayar'  => $totalBayar,
                 'sisa'         => $sisa,
                 'status'       => $sisa > 0 ? 'Belum Lunas' : 'Lunas',
+                'is_kelas_saat_ini' => $tagihanKelasSaatIni->contains($t->id),
             ];
         });
 
@@ -95,11 +158,14 @@ class CekTagihanController extends Controller
         $belum = $items->where('sisa','>',0)->values();
         $lunas = $items->where('sisa','=',0)->values();
 
-        // ringkasan
-        $totalTagihan = (int) $items->sum('nominal');
-        $totalBayar   = (int) $items->sum('total_bayar');
-        $totalSisa    = max(0, $totalTagihan - $totalBayar);
-        $progress     = $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
+        // ringkasan - hitung total dengan benar
+        $totalTagihanKelasSaatIni = $items->where('is_kelas_saat_ini', true)->sum('nominal');
+        $sisaTagihanKelasLama = $items->where('is_kelas_saat_ini', false)->sum('sisa');
+        
+        $totalTagihan = $totalTagihanKelasSaatIni + $sisaTagihanKelasLama;
+        $totalBayar = $items->where('is_kelas_saat_ini', true)->sum('total_bayar');
+        $totalSisa = max(0, $totalTagihan - $totalBayar);
+        $progress = $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
 
         $pdf = PDF::loadView('print.tagihan', [
             'siswa'        => $siswa,

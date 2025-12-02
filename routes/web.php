@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CekTagihanController;
 use App\Http\Controllers\CekKasController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,10 +21,14 @@ use App\Http\Controllers\AdminController;
 //     return view('login');
 // });
 
+
+
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
+
+Route::get('/export-low-progress', [App\Http\Controllers\HomeController::class, 'exportLowProgress'])->name('home.export-low-progress')->middleware('auth');
 
 Auth::routes();
-
 
 Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
 
@@ -42,11 +47,17 @@ Route::post(
 
 
 Route::middleware(['auth'])->group(function () {
+    // Profile routes
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    
     Route::resource('kas-sekolahs', App\Http\Controllers\KasSekolahController::class);
     Route::resource('siswas', App\Http\Controllers\SiswaController::class);
     Route::resource('kelas', App\Http\Controllers\KelasController::class);
     Route::get('/get-siswa-by-kelas/{kelas}', [App\Http\Controllers\SiswaController::class, 'getSiswaByKelas']);
     Route::get('/get-tagihan-by-siswa/{siswa_id}', [App\Http\Controllers\SiswaController::class, 'getTagihanBySiswa']);
+    Route::get('/get-sisa-tagihan/{siswa_id}/{tagihan_id}', [App\Http\Controllers\SiswaController::class, 'getSisaTagihan']);
     Route::get('/get-jurusan/{kelas}', [App\Http\Controllers\KelasController::class, 'getJurusan']);
     Route::resource('tagihans', App\Http\Controllers\TagihanController::class);
 

@@ -2,17 +2,36 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="mb-4 text-black-50">Cek Tagihan Siswa</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1"><i class="fas fa-search-dollar me-2 text-primary"></i>Cek Tagihan Siswa</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="breadcrumb-item active">Cek Tagihan</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     {{-- Form Pencarian --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="fas fa-search me-2 text-primary"></i>Pencarian Siswa</h5>
+        </div>
+        <div class="card-body p-4">
             <form action="{{ route('cek-tagihan') }}" method="GET" class="row g-3">
-                <div class="col-md-5">
-                    <input type="text" name="keyword" class="form-control" placeholder="Masukkan Nama atau NISN" value="{{ request('keyword') }}" required>
+                <div class="col-md-8">
+                    <label class="form-label">Nama atau NISN</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" name="keyword" class="form-control" placeholder="Masukkan Nama atau NISN" value="{{ request('keyword') }}" required>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Cari</button>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Cari
+                    </button>
                 </div>
             </form>
         </div>
@@ -20,34 +39,75 @@
 
     {{-- Jika ada hasil --}}
     @if($siswa)
-        <div class="card shadow-sm">
-            <div class="card-header"><strong>Detail Siswa</strong></div>
-            <div class="card-body">
-                <p><strong>Nama:</strong> {{ $siswa->nama }}</p>
-                <p><strong>NISN:</strong> {{ $siswa->nisn }}</p>
-                <p><strong>Kelas:</strong> {{ $siswa->kelas }}</p>
-                <p>
-                    <b>Progress Pembayaran:</b> 
-                    {{ $progress }}% 
-                    (Rp {{ number_format($totalBayar, 0, ',', '.') }} / Rp {{ number_format($totalTagihan, 0, ',', '.') }})
-                </p>
-
-                {{-- Progress Bar --}}
-                <div style="background:#eee; border-radius:5px; width:300px; height:20px; overflow:hidden;">
-                    <div style="background:#28a745; width:{{ $progress }}%; height:100%;"></div>
-                </div>
-        </div>
-
-        <div class="card mt-3 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Daftar Tagihan</strong>
-                <div>
-                    <a href="{{ route('tagihan.print', $siswa->id) }}" class="btn btn-sm btn-secondary" target="_blank">🖨️ Print</a>
-                    <a href="{{ route('tagihan.export', $siswa->id) }}" class="btn btn-sm btn-success">⬇️ Export</a>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-user-circle me-2 text-primary"></i>Detail Siswa</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-user text-primary me-3" style="font-size: 20px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Nama Siswa</small>
+                                <strong>{{ $siswa->nama }}</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-id-card text-primary me-3" style="font-size: 20px;"></i>
+                            <div>
+                                <small class="text-muted d-block">NISN</small>
+                                <strong>{{ $siswa->nisn }}</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-school text-primary me-3" style="font-size: 20px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Kelas</small>
+                                <strong>{{ $siswa->kelas }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-3">Progress Pembayaran</h6>
+                                <div class="progress mb-2" style="height: 30px;">
+                                    <div class="progress-bar {{ $progress >= 75 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-danger') }}" 
+                                         role="progressbar" 
+                                         style="width: {{ $progress }}%" 
+                                         aria-valuenow="{{ $progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        <strong>{{ round($progress) }}%</strong>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-success"><strong>Terbayar: Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></span>
+                                    <span class="text-danger"><strong>Total: Rp {{ number_format($totalTagihan, 0, ',', '.') }}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <table class="table table-bordered">
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Daftar Tagihan</h5>
+                <div>
+                    <a href="{{ route('tagihan.print', $siswa->id) }}" class="btn btn-sm btn-secondary" target="_blank">
+                        <i class="fas fa-print me-1"></i>Print
+                    </a>
+                    <a href="{{ route('tagihan.export', $siswa->id) }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel me-1"></i>Export
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
                     <thead class="table-primary">
                         <tr>
                             <th></th>

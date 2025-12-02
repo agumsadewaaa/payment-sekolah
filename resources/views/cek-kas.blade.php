@@ -2,22 +2,43 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="mb-4 text-black-50">Kas Sekolah</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1"><i class="fas fa-cash-register me-2 text-primary"></i>Laporan Kas Sekolah</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="breadcrumb-item active">Cek Kas</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     {{-- Form Time Range --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="fas fa-filter me-2 text-primary"></i>Filter Periode</h5>
+        </div>
+        <div class="card-body p-4">
             <form action="{{ route('cek-kas') }}" method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">From</label>
-                    <input type="date" name="from" class="form-control" value="{{ $from }}">
+                <div class="col-md-4">
+                    <label class="form-label">Tanggal Awal</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" name="from" class="form-control" value="{{ $from }}" required>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">To</label>
-                    <input type="date" name="to" class="form-control" value="{{ $to }}">
+                <div class="col-md-4">
+                    <label class="form-label">Tanggal Akhir</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" name="to" class="form-control" value="{{ $to }}" required>
+                    </div>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Cari</button>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Tampilkan
+                    </button>
                 </div>
             </form>
         </div>
@@ -25,54 +46,94 @@
 
     @if($from && $to)
     {{-- Ringkasan --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="fw-bold text-muted">Saldo Sebelumnya (s.d. {{ \Carbon\Carbon::parse($from)->subDay()->format('d M Y') }})</div>
-                    <div class="fs-4">Rp {{ number_format($summary['saldo_sebelumnya'], 0, ',', '.') }}</div>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-secondary bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-wallet text-white" style="font-size: 22px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small">Saldo Sebelumnya</p>
+                            <h5 class="mb-0 fw-bold">Rp {{ number_format($summary['saldo_sebelumnya'], 0, ',', '.') }}</h5>
+                            <small class="text-muted">s.d. {{ \Carbon\Carbon::parse($from)->subDay()->format('d M Y') }}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="fw-bold text-muted">Total Pendapatan</div>
-                    <div class="fs-4 text-success">Rp {{ number_format($summary['total_pendapatan'], 0, ',', '.') }}</div>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-success bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-arrow-down text-white" style="font-size: 22px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small">Total Pendapatan</p>
+                            <h5 class="mb-0 fw-bold text-success">Rp {{ number_format($summary['total_pendapatan'], 0, ',', '.') }}</h5>
+                            <small class="text-muted">Periode ini</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="fw-bold text-muted">Total Pengeluaran</div>
-                    <div class="fs-4 text-danger">Rp {{ number_format($summary['total_pengeluaran'], 0, ',', '.') }}</div>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-danger bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-arrow-up text-white" style="font-size: 22px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small">Total Pengeluaran</p>
+                            <h5 class="mb-0 fw-bold text-danger">Rp {{ number_format($summary['total_pengeluaran'], 0, ',', '.') }}</h5>
+                            <small class="text-muted">Periode ini</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="fw-bold text-muted">Saldo Akhir</div>
-                    <div class="fs-4">Rp {{ number_format($summary['saldo_akhir'], 0, ',', '.') }}</div>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-coins text-white" style="font-size: 22px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small">Saldo Akhir</p>
+                            <h5 class="mb-0 fw-bold text-primary">Rp {{ number_format($summary['saldo_akhir'], 0, ',', '.') }}</h5>
+                            <small class="text-muted">Per {{ \Carbon\Carbon::parse($to)->format('d M Y') }}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- DataTable --}}
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <strong>Transaksi ({{ \Carbon\Carbon::parse($from)->format('d M Y') }} - {{ \Carbon\Carbon::parse($to)->format('d M Y') }})</strong>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Transaksi ({{ \Carbon\Carbon::parse($from)->format('d M Y') }} - {{ \Carbon\Carbon::parse($to)->format('d M Y') }})</h5>
             <div>
                 <a href="{{ route('kas.export', ['from' => $from, 'to' => $to]) }}" class="btn btn-success btn-sm">
-                    ⬇️ Export Excel (Format Buku Kas)
+                    <i class="fas fa-file-excel me-1"></i>Export Excel
                 </a>
             </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table id="kasTable" class="table table-bordered table-striped w-100">
+                <table id="kasTable" class="table table-hover mb-0">
                     <thead class="table-primary">
                         <tr>
                             <th>Tanggal</th>

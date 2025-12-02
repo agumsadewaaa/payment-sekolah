@@ -68,6 +68,8 @@ class TagihanController extends AppBaseController
             return redirect(route('tagihans.index'));
         }
 
+        $tagihan->load('kelass');
+
         return view('tagihans.show')->with('tagihan', $tagihan);
     }
 

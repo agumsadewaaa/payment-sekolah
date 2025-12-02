@@ -1,6 +1,6 @@
 <div class="card-body">
     <div class="table-responsive">
-        <table id="kelas-table" class="display min-w850">
+        <table id="example3" class="display min-w850">
             <thead>
             <tr>
                 <th>Kode</th>

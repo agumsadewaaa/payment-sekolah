@@ -2,40 +2,56 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="mb-4">Dashboard</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0"><i class="fas fa-chart-line me-2"></i>Dashboard</h1>
+        <div class="text-muted">
+            <i class="fas fa-calendar-alt me-1"></i>
+            {{ now()->format('d F Y') }}
+        </div>
+    </div>
 
     {{-- Switch Range --}}
-    <div class="d-flex flex-wrap gap-2 mb-3">
-        @php $makeUrl = fn($r) => request()->fullUrlWithQuery(['range' => $r]); @endphp
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="text-muted me-2"><i class="fas fa-filter me-1"></i>Filter Periode:</span>
+                @php $makeUrl = fn($r) => request()->fullUrlWithQuery(['range' => $r]); @endphp
 
-        <a href="{{ $makeUrl('today') }}" class="btn btn-sm {{ $range==='today'?'btn-primary':'btn-outline-primary' }}">
-            Hari Ini
-        </a>
-        <a href="{{ $makeUrl('week') }}" class="btn btn-sm {{ $range==='week'?'btn-primary':'btn-outline-primary' }}">
-            Minggu Ini
-        </a>
-        <a href="{{ $makeUrl('month') }}" class="btn btn-sm {{ $range==='month'?'btn-primary':'btn-outline-primary' }}">
-            Bulan Ini
-        </a>
+                <a href="{{ $makeUrl('today') }}" class="btn btn-sm {{ $range==='today'?'btn-primary':'btn-outline-primary' }}">
+                    <i class="fas fa-calendar-day me-1"></i>Hari Ini
+                </a>
+                <a href="{{ $makeUrl('week') }}" class="btn btn-sm {{ $range==='week'?'btn-primary':'btn-outline-primary' }}">
+                    <i class="fas fa-calendar-week me-1"></i>Minggu Ini
+                </a>
+                <a href="{{ $makeUrl('month') }}" class="btn btn-sm {{ $range==='month'?'btn-primary':'btn-outline-primary' }}">
+                    <i class="fas fa-calendar-alt me-1"></i>Bulan Ini
+                </a>
 
-        <span class="ms-2 text-muted align-self-center">
-            Periode: <strong>{{ $start->format('d M Y') }}</strong> s.d. <strong>{{ $end->format('d M Y') }}</strong>
-        </span>
+                <div class="ms-auto">
+                    <span class="badge bg-light text-dark border">
+                        <i class="fas fa-clock me-1"></i>
+                        {{ $start->format('d M Y') }} - {{ $end->format('d M Y') }}
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- Statistik --}}
-    <div class="row">
-        <div class="col-xl-3 col-xxl-6 col-lg-6 col-sm-6">
-            <div class="widget-stat card">
-                <div class="card-body p-4">
-                    <div class="media ai-icon">
-                        <span class="me-3 bgl-primary text-primary">
-                            <i class="fa fa-user" style="font-size: 28px;"></i>
-                        </span>
-                        <div class="media-body">
-                            <p class="mb-1">Total Siswa</p>
-                            <h4 class="mb-0">{{ $totalSiswa ?? 0 }}</h4>
-                            <span>orang</span>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-users text-white" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small text-uppercase">Total Siswa</p>
+                            <h3 class="mb-0 fw-bold">{{ number_format($totalSiswa ?? 0) }}</h3>
+                            <small class="text-muted">Siswa aktif</small>
                         </div>
                     </div>
                 </div>
@@ -43,16 +59,25 @@
         </div>
 
         {{-- Total Kas (all-time) --}}
-        <div class="col-xl-3 col-xxl-6 col-lg-6 col-sm-6">
-            <div class="widget-stat card">
-                <div class="card-body p-4">
-                    <div class="media ai-icon">
-                        <span class="me-3 bgl-danger text-warning">
-                            <i class="fa fa-money-check-dollar" style="font-size: 28px;"></i>
-                        </span>
-                        <div class="media-body">
-                            <p class="mb-1">Total Kas</p>
-                            <h4 class="mb-0">@if(is_null($totalKas)) — @else Rp {{ number_format($totalKas, 0, ',', '.') }} @endif</h4>
+        <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-warning bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-wallet text-white" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small text-uppercase">Total Kas</p>
+                            <h3 class="mb-0 fw-bold text-warning">
+                                @if(is_null($totalKas)) 
+                                    —
+                                @else 
+                                    Rp {{ number_format($totalKas, 0, ',', '.') }}
+                                @endif
+                            </h3>
+                            <small class="text-muted">Saldo keseluruhan</small>
                         </div>
                     </div>
                 </div>
@@ -60,16 +85,25 @@
         </div>
 
         {{-- Pendapatan (range terpilih) --}}
-        <div class="col-xl-3 col-xxl-6 col-lg-6 col-sm-6">
-            <div class="widget-stat card">
-                <div class="card-body p-4">
-                    <div class="media ai-icon">
-                        <span class="me-3 bgl-danger text-success">
-                            <i class="fa fa-download" style="font-size: 28px;"></i>
-                        </span>
-                        <div class="media-body">
-                            <p class="mb-1">Pendapatan ({{ $rangeLabel }})</p>
-                            <h4 class="mb-0 text-success">@if(is_null($pemasukanRange)) — @else Rp {{ number_format($pemasukanRange, 0, ',', '.') }} @endif</h4>
+        <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-success bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-arrow-down text-white" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small text-uppercase">Pendapatan</p>
+                            <h3 class="mb-0 fw-bold text-success">
+                                @if(is_null($pemasukanRange)) 
+                                    —
+                                @else 
+                                    Rp {{ number_format($pemasukanRange, 0, ',', '.') }}
+                                @endif
+                            </h3>
+                            <small class="text-muted">{{ $rangeLabel }}</small>
                         </div>
                     </div>
                 </div>
@@ -77,16 +111,25 @@
         </div>
 
         {{-- Pengeluaran (range terpilih) --}}
-        <div class="col-xl-3 col-xxl-6 col-lg-6 col-sm-6">
-            <div class="widget-stat card">
-                <div class="card-body p-4">
-                    <div class="media ai-icon">
-                        <span class="me-3 bgl-danger text-danger">
-                            <i class="fa fa-upload" style="font-size: 28px;"></i>
-                        </span>
-                        <div class="media-body">
-                            <p class="mb-1">Pengeluaran ({{ $rangeLabel }})</p>
-                            <h4 class="mb-0 text-danger">@if(is_null($pengeluaranRange)) — @else Rp {{ number_format($pengeluaranRange, 0, ',', '.') }} @endif</h4>
+        <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-sm rounded-circle bg-danger bg-gradient d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-arrow-up text-white" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted mb-1 small text-uppercase">Pengeluaran</p>
+                            <h3 class="mb-0 fw-bold text-danger">
+                                @if(is_null($pengeluaranRange)) 
+                                    —
+                                @else 
+                                    Rp {{ number_format($pengeluaranRange, 0, ',', '.') }}
+                                @endif
+                            </h3>
+                            <small class="text-muted">{{ $rangeLabel }}</small>
                         </div>
                     </div>
                 </div>
@@ -95,79 +138,136 @@
     </div>
 
     {{-- Grafik Kas --}}
-    <div class="card shadow-sm my-4">
-        <div class="card-header">
-            Grafik Kas ({{ $rangeLabel }}) — {{ $start->format('d M Y') }} s.d. {{ $end->format('d M Y') }}
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-chart-bar me-2 text-primary"></i>
+                <h5 class="mb-0">Grafik Kas - {{ $rangeLabel }}</h5>
+                <span class="ms-auto badge bg-light text-dark">
+                    {{ $start->format('d M Y') }} - {{ $end->format('d M Y') }}
+                </span>
+            </div>
         </div>
-        <div class="card-body">
-            <canvas id="kasChart" height="100"></canvas>
+        <div class="card-body p-4">
+            <canvas id="kasChart" height="80"></canvas>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
         {{-- List siswa progress rendah --}}
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header">Siswa Progress &lt; 50%</div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                        <strong>Siswa Progress &lt; 50%</strong>
+                    </div>
+                    <a href="{{ route('home.export-low-progress') }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Download Excel
+                    </a>
+                </div>
                 <div class="card-body p-0">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>Kelas</th>
-                                <th>Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(is_null($siswaProgress) || $siswaProgress->isEmpty())
-                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
-                            @else
-                                @foreach($siswaProgress as $siswa)
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ $siswa->nama }}</td>
-                                    <td>{{ $siswa->kode }}</td>
-                                    <td>
-                                        <div class="progress" style="height:10px;">
-                                            <div class="progress-bar bg-danger" style="width: {{ $siswa->progress }}%"></div>
-                                        </div>
-                                        <small>{{ $siswa->progress }}%</small>
-                                    </td>
+                                    <th class="px-3">Nama Siswa</th>
+                                    <th class="px-3">Kelas</th>
+                                    <th class="px-3" style="min-width: 150px;">Progress</th>
                                 </tr>
-                                @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @if(is_null($siswaProgress) || $siswaProgress->isEmpty())
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="fas fa-check-circle fa-2x mb-2 d-block text-success"></i>
+                                            Semua siswa memiliki progress baik
+                                        </td>
+                                    </tr>
+                                @else
+                                    @foreach($siswaProgress as $siswa)
+                                    <tr>
+                                        <td class="px-3 align-middle">
+                                            <i class="fas fa-user-circle text-muted me-1"></i>
+                                            {{ $siswa->nama }}
+                                        </td>
+                                        <td class="px-3 align-middle">
+                                            <span class="badge bg-info">{{ $siswa->kode }}</span>
+                                        </td>
+                                        <td class="px-3 align-middle">
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 18px;">
+                                                    <div class="progress-bar {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }}" 
+                                                         role="progressbar"
+                                                         style="width: {{ round($siswa->progress) }}%"
+                                                         aria-valuenow="{{ round($siswa->progress) }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <span class="badge {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }} text-white" style="min-width: 45px;">
+                                                    {{ round($siswa->progress) }}%
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Latest Pengeluaran --}}
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header">Latest Pengeluaran</div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom">
+                    <i class="fas fa-receipt text-danger me-2"></i>
+                    <strong>Pengeluaran Terbaru</strong>
+                </div>
                 <div class="card-body p-0">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Catatan</th>
-                                <th>Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(is_null($latestPengeluaran) || $latestPengeluaran->isEmpty())
-                                <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
-                            @else
-                                @foreach($latestPengeluaran as $out)
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($out->tanggal)->format('d-M-Y') }}</td>
-                                    <td>{{ $out->catatan }}</td>
-                                    <td class="text-danger">Rp {{ number_format($out->nominal, 0, ',', '.') }}</td>
+                                    <th class="px-3">Tanggal</th>
+                                    <th class="px-3">Catatan</th>
+                                    <th class="px-3 text-end">Nominal</th>
                                 </tr>
-                                @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @if(is_null($latestPengeluaran) || $latestPengeluaran->isEmpty())
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                            Tidak ada data pengeluaran
+                                        </td>
+                                    </tr>
+                                @else
+                                    @foreach($latestPengeluaran as $out)
+                                    <tr>
+                                        <td class="px-3 align-middle">
+                                            <i class="far fa-calendar-alt text-muted me-1"></i>
+                                            <small>{{ \Carbon\Carbon::parse($out->tanggal)->format('d M Y') }}</small>
+                                        </td>
+                                        <td class="px-3 align-middle">
+                                            <div class="text-truncate" style="max-width: 250px;" title="{{ $out->catatan }}">
+                                                {{ $out->catatan }}
+                                            </div>
+                                        </td>
+                                        <td class="px-3 align-middle text-end">
+                                            <span class="badge bg-danger">
+                                                Rp {{ number_format($out->nominal, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

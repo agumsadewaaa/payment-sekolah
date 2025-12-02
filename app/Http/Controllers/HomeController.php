@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LowProgressSiswaExport;
 
 class HomeController extends Controller
 {
@@ -61,40 +63,20 @@ class HomeController extends Controller
             $dataPengeluaran[] = isset($byDate[$key]) ? (int)$byDate[$key]->pengeluaran : 0;
         }
 
-        // ===== 4) Siswa progress < 50% (punyamu, tanpa ubah) =====
-        $subKas = DB::table('tb_kas_siswa')
-            ->select('siswa_id', DB::raw('SUM(nominal) as total_bayar'))
-            ->whereNull('deleted_at')
-            ->groupBy('siswa_id');
-
-        $subTagihan = DB::table('tb_tagihan_siswa')
-            ->select('kelas', DB::raw('SUM(nominal) as total_tagihan'))
-            ->groupBy('kelas');
-
-        $siswaProgress = DB::table('tb_siswa')
-            ->join('tb_kelas', 'tb_siswa.jurusan', '=', 'tb_kelas.id')
-            ->leftJoinSub($subKas, 'kas', fn($join) => $join->on('tb_siswa.id','=','kas.siswa_id'))
-            ->leftJoinSub($subTagihan, 'tagihan', fn($join) => $join->on('tb_siswa.jurusan','=','tagihan.kelas'))
-            ->select(
-                'tb_siswa.id','tb_siswa.nama','tb_kelas.kode',
-                DB::raw('COALESCE(kas.total_bayar,0) as total_bayar'),
-                DB::raw('COALESCE(tagihan.total_tagihan,0) as total_tagihan'),
-
-                // progress selalu angka (0..100), 2 desimal
-                DB::raw("
-                    COALESCE(
-                        ROUND(
-                            CASE 
-                                WHEN COALESCE(tagihan.total_tagihan,0) > 0 
-                                THEN (COALESCE(kas.total_bayar,0) / NULLIF(tagihan.total_tagihan,0)) * 100
-                                ELSE 0
-                            END
-                        , 2)
-                    , 0) as progress
-                ")
-            )
-            ->having('progress','<',50)
-            ->get();
+        // ===== 4) Siswa progress < 50% =====
+        // Ambil semua siswa dengan progress menggunakan attribute dari model
+        $allSiswa = \App\Models\Siswa::with('jurusans')->get();
+        
+        $siswaProgress = $allSiswa->filter(function($siswa) {
+            return $siswa->progress < 50;
+        })->map(function($siswa) {
+            return (object)[
+                'id' => $siswa->id,
+                'nama' => $siswa->nama,
+                'kode' => $siswa->jurusans ? $siswa->jurusans->kode : '-',
+                'progress' => $siswa->progress
+            ];
+        });
 
         if ($siswaProgress->isEmpty()) {
             $siswaProgress = null;
@@ -153,5 +135,10 @@ class HomeController extends Controller
                 $label = 'Bulan Ini';
         }
         return [$start, $end, $label];
+    }
+
+    public function exportLowProgress()
+    {
+        return Excel::download(new LowProgressSiswaExport(), 'siswa-progress-rendah-' . date('Y-m-d') . '.xlsx');
     }
 }

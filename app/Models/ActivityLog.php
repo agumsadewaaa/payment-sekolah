@@ -15,4 +15,9 @@ class ActivityLog extends Model
         'old_values' => 'array',
         'new_values' => 'array',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

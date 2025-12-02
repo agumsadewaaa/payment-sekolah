@@ -4,6 +4,10 @@
     </IfModule>
 
     RewriteEngine On
+    
+    # Allow access
+    Options +FollowSymLinks
+    Require all granted
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

@@ -58,10 +58,22 @@ class KasSekolahController extends AppBaseController
             $siswa = Siswa::find($request->siswa_id);
             $tagihan = Tagihan::find($request->tagihan_id);
 
+            // Validasi: cek sisa tagihan
+            $totalBayar = KasSiswa::where('siswa_id', $siswa->id)
+                ->where('tagihan_id', $tagihan->id)
+                ->sum('nominal');
+            
+            $sisaTagihan = $tagihan->nominal - $totalBayar;
+
+            // Cek apakah pembayaran melebihi sisa
+            if ($input['nominal'] > $sisaTagihan) {
+                Flash::error('Pembayaran melebihi sisa tagihan! Sisa tagihan: Rp ' . number_format($sisaTagihan, 0, ',', '.'));
+                return redirect()->back()->withInput();
+            }
+
             $kodeKelas = $kelas->kode ?? '';
             $namaSiswa = $siswa->nama ?? '';
             $namaTagihan = $tagihan->tagihan ?? '';
-            $nominalTagihan = $tagihan->nominal ?? 0;
 
             // Buat catatan gabungan
             if($kelas && $namaSiswa && $namaTagihan) {
@@ -71,7 +83,9 @@ class KasSekolahController extends AppBaseController
             // Simpan ke kas sekolah
             $kasSekolah = $this->kasSekolahRepository->create($input);
 
-            // Record pertama: nominal yang dibayar → selalu lunas
+            // Record pertama: nominal yang dibayar → selalu lunas jika pembayaran = sisa
+            $status = ($totalBayar + $input['nominal']) >= $tagihan->nominal ? 'lunas' : 'belum_lunas';
+
             KasSiswa::create([
                 'kas_sekolah_id' => $kasSekolah->id,
                 'siswa_id' => $siswa->id,
@@ -79,7 +93,7 @@ class KasSekolahController extends AppBaseController
                 'tanggal' => $input['tanggal'],
                 'metode_pembayaran' => $input['metode_pembayaran'],
                 'nominal' => $input['nominal'],
-                'status' => 'lunas'
+                'status' => $status
             ]);
         } else {
             // Simpan ke kas sekolah
@@ -120,7 +134,8 @@ class KasSekolahController extends AppBaseController
             return redirect(route('kas-sekolahs.index'));
         }
 
-        return view('kas_sekolahs.edit')->with('kasSekolah', $kasSekolah);
+        $kelas = \App\Models\Kelas::orderBy('kode', 'asc')->pluck('kode', 'id');
+        return view('kas_sekolahs.edit', compact('kasSekolah', 'kelas'));
     }
 
     /**

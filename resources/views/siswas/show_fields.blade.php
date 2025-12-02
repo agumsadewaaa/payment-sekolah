@@ -1,72 +1,81 @@
-<!-- Id Field -->
-<div class="col-sm-12">
-    {!! Form::label('id', 'Id:') !!}
-    <p>{{ $siswa->id }}</p>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-user me-2"></i>Nama Lengkap</label>
+            <h5 class="mb-0">{{ $siswa->nama }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-id-card me-2"></i>NISN</label>
+            <h5 class="mb-0">{{ $siswa->nisn }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-school me-2"></i>Kelas</label>
+            <h5 class="mb-0">{{ $siswa->kelas }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-book me-2"></i>Jurusan</label>
+            <h5 class="mb-0">{{ $siswa->jurusan ?? '-' }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-phone me-2"></i>Kontak Orang Tua</label>
+            <h5 class="mb-0">{{ $siswa->kontak_ortu }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-toggle-on me-2"></i>Status Siswa</label>
+            <h5 class="mb-0">
+                @if($siswa->status_siswa == 'aktif')
+                    <span class="badge bg-success">Aktif</span>
+                @else
+                    <span class="badge bg-secondary">{{ ucfirst($siswa->status_siswa) }}</span>
+                @endif
+            </h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-calendar-plus me-2"></i>Tahun Masuk</label>
+            <h5 class="mb-0">{{ $siswa->tahun_masuk }}</h5>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded">
+            <label class="text-muted small mb-1"><i class="fas fa-graduation-cap me-2"></i>Tahun Lulus</label>
+            <h5 class="mb-0">{{ $siswa->tahun_lulus ?? '-' }}</h5>
+        </div>
+    </div>
 </div>
 
-<!-- Nama Field -->
-<div class="col-sm-12">
-    {!! Form::label('nama', 'Nama:') !!}
-    <p>{{ $siswa->nama }}</p>
-</div>
+<hr class="my-4">
 
-<!-- Nisn Field -->
-<div class="col-sm-12">
-    {!! Form::label('nisn', 'Nisn:') !!}
-    <p>{{ $siswa->nisn }}</p>
-</div>
-
-<!-- Kontak Ortu Field -->
-<div class="col-sm-12">
-    {!! Form::label('kontak_ortu', 'Kontak Ortu:') !!}
-    <p>{{ $siswa->kontak_ortu }}</p>
-</div>
-
-<!-- Kelas Field -->
-<div class="col-sm-12">
-    {!! Form::label('kelas', 'Kelas:') !!}
-    <p>{{ $siswa->kelas }}</p>
-</div>
-
-<!-- Jurusan Field -->
-<div class="col-sm-12">
-    {!! Form::label('jurusan', 'Jurusan:') !!}
-    <p>{{ $siswa->jurusan }}</p>
-</div>
-
-<!-- Tahun Masuk Field -->
-<div class="col-sm-12">
-    {!! Form::label('tahun_masuk', 'Tahun Masuk:') !!}
-    <p>{{ $siswa->tahun_masuk }}</p>
-</div>
-
-<!-- Tahun Lulus Field -->
-<div class="col-sm-12">
-    {!! Form::label('tahun_lulus', 'Tahun Lulus:') !!}
-    <p>{{ $siswa->tahun_lulus }}</p>
-</div>
-
-<!-- Status Siswa Field -->
-<div class="col-sm-12">
-    {!! Form::label('status_siswa', 'Status Siswa:') !!}
-    <p>{{ $siswa->status_siswa }}</p>
-</div>
-
-<!-- Created At Field -->
-<div class="col-sm-12">
-    {!! Form::label('created_at', 'Created At:') !!}
-    <p>{{ $siswa->created_at }}</p>
-</div>
-
-<!-- Updated At Field -->
-<div class="col-sm-12">
-    {!! Form::label('updated_at', 'Updated At:') !!}
-    <p>{{ $siswa->updated_at }}</p>
-</div>
-
-<!-- Deleted At Field -->
-<div class="col-sm-12">
-    {!! Form::label('deleted_at', 'Deleted At:') !!}
-    <p>{{ $siswa->deleted_at }}</p>
+<div class="row">
+    <div class="col-md-6">
+        <small class="text-muted">
+            <i class="far fa-calendar-alt me-1"></i>
+            Dibuat: {{ $siswa->created_at->format('d F Y, H:i') }}
+        </small>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <small class="text-muted">
+            <i class="far fa-edit me-1"></i>
+            Diperbarui: {{ $siswa->updated_at->format('d F Y, H:i') }}
+        </small>
+    </div>
 </div>
 

@@ -38,11 +38,8 @@
     ]) !!}
 </div>
 
-<!-- Kode Kelas Field (Read-only, auto-generated) -->
-<div class="form-group col-sm-6">
-    {!! Form::label('kode_kelas', 'Kode Kelas:') !!}
-    {!! Form::text('kode_kelas', null, ['class' => 'form-control', 'readonly', 'id' => 'kode_kelas', 'placeholder' => 'Auto-generated']) !!}
-</div>
+<!-- Kode Kelas Field (Hidden, auto-generated) -->
+{!! Form::hidden('kode_kelas', null, ['id' => 'kode_kelas']) !!}
 
 <!-- Tahun Masuk Field -->
 <div class="form-group col-sm-6">

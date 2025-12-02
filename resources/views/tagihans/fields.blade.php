@@ -17,7 +17,10 @@
 <!-- Nominal Field -->
 <div class="form-group col-sm-12">
     {!! Form::label('nominal', 'Nominal:') !!}<span class="text-danger">*</span>
-    {!! Form::text('nominal', null, ['class' => 'form-control nominal', 'id' => 'nominal', 'required' => true]) !!}
+    <div class="input-group">
+        <span class="input-group-text">Rp</span>
+        {!! Form::text('nominal', null, ['class' => 'form-control nominal', 'id' => 'nominal', 'placeholder' => 'Masukkan nominal', 'required' => true]) !!}
+    </div>
 </div>
 
 @push('scripts')

@@ -1,40 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<!--**********************************
-    Content body start
-***********************************-->
-<section class="content-header">    
-    <div class="container-fluid">
-        <div class="page-titles">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
-                <li class="breadcrumb-item active"><a href="javascript:void(0)">Kas Sekolah</a></li>
-            </ol>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1"><i class="fas fa-money-bill-wave me-2 text-primary"></i>Kas Sekolah</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="breadcrumb-item active">Kas Sekolah</li>
+                </ol>
+            </nav>
         </div>
+        @role('admin')
+        <div>
+            <a class="btn btn-primary" href="{{ route('kas-sekolahs.create') }}">
+                <i class="fas fa-plus me-1"></i>Tambah Transaksi
+            </a>
+        </div>
+        @endrole
+    </div>
 
-        <div class="content px-3">
+    <div class="row">
+        <div class="col-12">
             @include('flash::message')
-            <div class="clearfix"></div>
-        </div>
-        <!-- row -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">List Kas Sekolah</h4>
-                        @role('admin')
-                            <a class="btn btn-primary float-right" href="{{ route('kas-sekolahs.create') }}">Add New</a>
-                        @endrole
-                    </div>
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Daftar Transaksi</h5>
+                </div>
+                <div class="card-body p-0">
                     @include('kas_sekolahs.table')
                 </div>
             </div>
         </div>
     </div>
-</section>
-<!--**********************************
-    Content body end
-***********************************-->
+</div>
 
 @endsection

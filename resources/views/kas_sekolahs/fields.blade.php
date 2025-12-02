@@ -172,6 +172,35 @@ $(document).ready(function() {
             });
         }
     });
+
+    // Tagihan -> validasi nominal max
+    $('#tagihan_id').on('change', function() {
+        var tagihan_id = $(this).val();
+        var siswa_id = $('#siswa_id').val();
+        
+        if(tagihan_id && siswa_id) {
+            // Get sisa tagihan via AJAX
+            $.get('/get-sisa-tagihan/' + siswa_id + '/' + tagihan_id, function(response) {
+                if(response.sisa !== undefined) {
+                    var sisaTagihan = response.sisa;
+                    var nominalInput = $('#nominal');
+                    
+                    // Set max attribute
+                    nominalInput.attr('max', sisaTagihan);
+                    nominalInput.attr('placeholder', 'Maksimal: Rp ' + sisaTagihan.toLocaleString('id-ID'));
+                    
+                    // Tambahkan info sisa
+                    if($('#info-sisa').length === 0) {
+                        nominalInput.closest('.form-group').append(
+                            '<small id="info-sisa" class="text-info">Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID') + '</small>'
+                        );
+                    } else {
+                        $('#info-sisa').text('Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID'));
+                    }
+                }
+            });
+        }
+    });
 });
 </script>
 @endpush

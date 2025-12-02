@@ -140,23 +140,41 @@ class SiswaController extends AppBaseController
     {
         $siswa = Siswa::findOrFail($siswa_id);
 
-        // Ambil semua tagihan kelas siswa
-        $tagihanBelumLunas = Tagihan::where('kelas', $siswa->jurusan)
-            ->whereHas('kasSiswa', function ($q) use ($siswa_id) {
+        // Ambil SEMUA tagihan yang pernah berlaku untuk siswa ini
+        // Termasuk tagihan dari kelas sebelumnya yang belum lunas (carry-over)
+        $tagihanBelumLunas = Tagihan::whereHas('kasSiswa', function ($q) use ($siswa_id) {
                 $q->where('siswa_id', $siswa_id);
-            }, '>=', 0) // hanya untuk pastikan ada relasi
+            }, '>=', 0) // tagihan yang pernah ada pembayaran dari siswa ini
+            ->orWhere('kelas', $siswa->jurusan) // ATAU tagihan kelas saat ini
             ->get()
             ->filter(function ($tagihan) use ($siswa_id) {
-                // Hitung total pembayaran di kas siswa
+                // Hitung total pembayaran di kas siswa untuk tagihan ini
                 $totalBayar = $tagihan->kasSiswa()
                     ->where('siswa_id', $siswa_id)
                     ->sum('nominal');
 
-                // Tagihan tetap muncul kalau total bayar < nominal tagihan
+                // Tagihan tetap muncul kalau total bayar < nominal tagihan (belum lunas)
                 return $totalBayar < $tagihan->nominal;
             })
             ->pluck('tagihan', 'id');
 
         return response()->json($tagihanBelumLunas);
+    }
+
+    public function getSisaTagihan($siswa_id, $tagihan_id)
+    {
+        $tagihan = Tagihan::findOrFail($tagihan_id);
+        
+        $totalBayar = KasSiswa::where('siswa_id', $siswa_id)
+            ->where('tagihan_id', $tagihan_id)
+            ->sum('nominal');
+        
+        $sisa = $tagihan->nominal - $totalBayar;
+
+        return response()->json([
+            'sisa' => $sisa > 0 ? $sisa : 0,
+            'nominal_tagihan' => $tagihan->nominal,
+            'total_bayar' => $totalBayar
+        ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\SendYesterdayActivityReport;
 
 // InfyOm Generator Commands
 use InfyOm\Generator\Commands\Scaffold\ScaffoldGeneratorCommand;
@@ -17,6 +18,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         ScaffoldGeneratorCommand::class,
+        SendYesterdayActivityReport::class,
     ];
 
     /**
@@ -24,7 +26,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Send daily activity report for yesterday at 00:01
+        $schedule->command('report:activity-yesterday')->dailyAt('00:01');
     }
 
     /**
