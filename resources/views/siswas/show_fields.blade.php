@@ -16,14 +16,14 @@
     <div class="col-md-6">
         <div class="p-3 bg-light rounded">
             <label class="text-muted small mb-1"><i class="fas fa-school me-2"></i>Kelas</label>
-            <h5 class="mb-0">{{ $siswa->kelas }}</h5>
+            <h5 class="mb-0">{{ $siswa->kelas_format }}</h5>
         </div>
     </div>
 
     <div class="col-md-6">
         <div class="p-3 bg-light rounded">
             <label class="text-muted small mb-1"><i class="fas fa-book me-2"></i>Jurusan</label>
-            <h5 class="mb-0">{{ $siswa->jurusan ?? '-' }}</h5>
+            <h5 class="mb-0">{{ optional($siswa->jurusans)->jurusan ?? '-' }}</h5>
         </div>
     </div>
 

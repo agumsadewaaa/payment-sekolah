@@ -64,7 +64,7 @@
                             <i class="fas fa-school text-primary me-3" style="font-size: 20px;"></i>
                             <div>
                                 <small class="text-muted d-block">Kelas</small>
-                                <strong>{{ $siswa->kelas }}</strong>
+                                <strong>{{ $siswa->kelas_format }}</strong>
                             </div>
                         </div>
                     </div>

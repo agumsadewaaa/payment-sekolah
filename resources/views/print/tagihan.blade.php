@@ -71,7 +71,7 @@
             <div><b>NISN</b>: {{ $siswa->nisn }}</div>
         </div>
         <div>
-            <div><b>Kelas</b>: {{ $siswa->kelas }}</div>
+            <div><b>Kelas</b>: {{ $siswa->kelas_format }}</div>
             <div><b>Jurusan</b>: {{ optional($siswa->jurusans)->jurusan ?? '-' }}</div>
         </div>
     </div>
