@@ -76,6 +76,21 @@
         </div>
     </div>
 
+    {{-- RINGKASAN PEMBAYARAN --}}
+    <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        <div style="font-weight: bold; margin-bottom: 8px; font-size: 13px;">Ringkasan Pembayaran:</div>
+        <div class="grid-2" style="font-size: 12px;">
+            <div>
+                <div><b>Total Tagihan</b>: Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
+                <div><b>Total Terbayar</b>: Rp {{ number_format($totalBayar, 0, ',', '.') }}</div>
+            </div>
+            <div>
+                <div><b>Sisa Tagihan</b>: Rp {{ number_format($totalSisa, 0, ',', '.') }}</div>
+                <div><b>Progress</b>: {{ round($progress) }}%</div>
+            </div>
+        </div>
+    </div>
+
     @php
         // ===== Helper nama tagihan & uang
         $rupiah = fn($v) => 'Rp '.number_format((int)$v, 0, ',', '.');
@@ -128,6 +143,32 @@
                     <td class="num">{{ $rupiah($t->sisa ?? 0) }}</td>
                     <td class="center">Belum</td>
                 </tr>
+                @if(isset($t->pembayaran) && count($t->pembayaran) > 0)
+                <tr>
+                    <td colspan="5" style="padding: 0; background: #f9f9f9;">
+                        <table style="width: 100%; margin: 0; border: none;">
+                            <thead>
+                                <tr style="background: #e9ecef;">
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Detail</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Tanggal Bayar</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Metode</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px; text-align: right;">Jumlah Bayar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($t->pembayaran as $i => $p)
+                                <tr>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">Angsuran {{ $i+1 }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y') }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ $p->metode_pembayaran ?? '-' }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px; text-align: right;">{{ $rupiah($p->nominal) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                @endif
             @empty
                 <tr><td colspan="5" class="center">Tidak ada tagihan belum lunas</td></tr>
             @endforelse
@@ -160,6 +201,32 @@
                     <td class="num">{{ $rupiah($t->nominal ?? 0) }}</td>
                     <td class="num">{{ $rupiah($t->total_bayar ?? 0) }}</td>
                 </tr>
+                @if(isset($t->pembayaran) && count($t->pembayaran) > 0)
+                <tr>
+                    <td colspan="3" style="padding: 0; background: #f9f9f9;">
+                        <table style="width: 100%; margin: 0; border: none;">
+                            <thead>
+                                <tr style="background: #e9ecef;">
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Detail</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Tanggal Bayar</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px;">Metode</th>
+                                    <th style="border: none; padding: 4px 8px; font-size: 11px; text-align: right;">Jumlah Bayar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($t->pembayaran as $i => $p)
+                                <tr>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">Angsuran {{ $i+1 }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y') }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ $p->metode_pembayaran ?? '-' }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px; text-align: right;">{{ $rupiah($p->nominal) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                @endif
             @empty
                 <tr><td colspan="3" class="center">Tidak ada tagihan lunas</td></tr>
             @endforelse

@@ -143,6 +143,13 @@ class CekTagihanController extends Controller
             $totalBayar = (int) ($bayarPerTagihan[$t->id] ?? 0);
             $sisa = max(0, (int)$t->nominal - $totalBayar);
 
+            // Ambil detail pembayaran
+            $pembayaran = KasSiswa::where('siswa_id', $siswa->id)
+                ->where('tagihan_id', $t->id)
+                ->whereNull('deleted_at')
+                ->orderBy('tanggal', 'asc')
+                ->get();
+
             return (object)[
                 'id'           => $t->id,
                 'nama_tagihan' => $t->tagihan,
@@ -151,6 +158,7 @@ class CekTagihanController extends Controller
                 'sisa'         => $sisa,
                 'status'       => $sisa > 0 ? 'Belum Lunas' : 'Lunas',
                 'is_kelas_saat_ini' => $tagihanKelasSaatIni->contains($t->id),
+                'pembayaran'   => $pembayaran,
             ];
         });
 

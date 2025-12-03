@@ -43,28 +43,66 @@ class SiswaExport implements FromArray, WithHeadings
         // Gabungkan tagihan kelas saat ini + carry-over belum lunas
         $allTagihanIds = $tagihanKelasSaatIni->merge($tagihanBelumLunasKelasLama)->unique();
 
-        $tagihans = Tagihan::whereIn('id', $allTagihanIds)->get()->map(function ($tagihan) {
+        $result = [];
+        
+        // Header info siswa
+        $result[] = ['DAFTAR TAGIHAN SISWA'];
+        $result[] = [];
+        $result[] = ['Nama', $this->siswa->nama];
+        $result[] = ['NISN', $this->siswa->nisn];
+        $result[] = ['Kelas', $this->siswa->kelas];
+        $result[] = [];
+        
+        // Header tabel tagihan
+        $result[] = ['Nama Tagihan', 'Nominal', 'Total Bayar', 'Sisa', 'Status'];
+
+        $tagihans = Tagihan::whereIn('id', $allTagihanIds)->orderBy('tagihan')->get();
+        
+        foreach ($tagihans as $tagihan) {
             $totalBayar = KasSiswa::where('siswa_id', $this->siswa->id)
                         ->where('tagihan_id', $tagihan->id)
+                        ->whereNull('deleted_at')
                         ->sum('nominal');
 
             $sisa = $tagihan->nominal - $totalBayar;
 
-            return [
-                'nama_tagihan' => $tagihan->tagihan,
-                'nominal'      => $tagihan->nominal,
-                'total_bayar'  => $totalBayar,
-                'sisa'         => $sisa > 0 ? $sisa : 0,
-                'status'       => $sisa <= 0 ? 'Lunas' : 'Belum Lunas',
+            // Baris tagihan utama
+            $result[] = [
+                $tagihan->tagihan,
+                $tagihan->nominal,
+                $totalBayar,
+                $sisa > 0 ? $sisa : 0,
+                $sisa <= 0 ? 'Lunas' : 'Belum Lunas',
             ];
-        });
+            
+            // Detail pembayaran
+            $pembayaran = KasSiswa::where('siswa_id', $this->siswa->id)
+                ->where('tagihan_id', $tagihan->id)
+                ->whereNull('deleted_at')
+                ->orderBy('tanggal', 'asc')
+                ->get();
+                
+            if ($pembayaran->count() > 0) {
+                $result[] = ['', 'Detail', 'Tanggal Bayar', 'Metode', 'Jumlah Bayar'];
+                foreach ($pembayaran as $i => $p) {
+                    $result[] = [
+                        '',
+                        'Angsuran ' . ($i + 1),
+                        \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y'),
+                        $p->metode_pembayaran ?? '-',
+                        $p->nominal
+                    ];
+                }
+                $result[] = []; // baris kosong pemisah
+            }
+        }
 
-        return $tagihans->toArray();
+        return $result;
     }
 
     public function headings(): array
     {
-        return ['Nama Tagihan', 'Nominal', 'Total Bayar', 'Sisa', 'Status'];
+        return [];
     }
 }
 

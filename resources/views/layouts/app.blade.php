@@ -212,7 +212,7 @@
 										<span class="text-black">Hello, <strong>{{ Auth::user()->name }}</strong></span>
 										<p class="fs-12 mb-0">{{ Auth::user()->roles->pluck('name')->first() ?? 'User' }}</p>
 									</div>
-                                    <img src="{{ asset('images/profile/17.jpg') }}" width="20" alt="">
+                                    <img src="{{ asset('profil.png') }}" width="20" alt="">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a href="{{ route('profile.edit') }}" class="dropdown-item ai-icon">
