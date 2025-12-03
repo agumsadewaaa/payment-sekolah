@@ -22,26 +22,14 @@ class SiswaExport implements FromArray, WithHeadings
         // 1. Ambil tagihan kelas saat ini
         $tagihanKelasSaatIni = Tagihan::where('kelas', $this->siswa->jurusan)->pluck('id');
 
-        // 2. Ambil tagihan dari kelas lama yang BELUM LUNAS (carry-over)
-        $tagihanBelumLunasKelasLama = KasSiswa::where('siswa_id', $this->siswa->id)
+        // 2. Ambil SEMUA tagihan dari kelas lama yang pernah dibayar (carry-over - termasuk yang lunas)
+        $tagihanKelasLama = KasSiswa::where('siswa_id', $this->siswa->id)
             ->select('tagihan_id')
             ->groupBy('tagihan_id')
-            ->get()
-            ->filter(function($kas) {
-                $tagihan = Tagihan::find($kas->tagihan_id);
-                if (!$tagihan) return false;
-                
-                $totalBayar = KasSiswa::where('siswa_id', $this->siswa->id)
-                    ->where('tagihan_id', $kas->tagihan_id)
-                    ->sum('nominal');
-                
-                // Hanya ambil yang belum lunas
-                return $totalBayar < $tagihan->nominal;
-            })
             ->pluck('tagihan_id');
 
-        // Gabungkan tagihan kelas saat ini + carry-over belum lunas
-        $allTagihanIds = $tagihanKelasSaatIni->merge($tagihanBelumLunasKelasLama)->unique();
+        // Gabungkan tagihan kelas saat ini + semua tagihan kelas lama
+        $allTagihanIds = $tagihanKelasSaatIni->merge($tagihanKelasLama)->unique();
 
         $result = [];
         
