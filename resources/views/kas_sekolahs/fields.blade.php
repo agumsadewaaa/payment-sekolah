@@ -11,11 +11,16 @@
 <!-- Tanggal Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('tanggal', 'Tanggal:') !!}<span class="text-danger">*</span>
-    {!! Form::date('tanggal', null, [
-        'class' => 'form-control',
-        'id' => 'tanggal',
-        'required'
-    ]) !!}
+    <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+        {!! Form::text('tanggal', null, [
+            'class' => 'form-control datepicker-default',
+            'id' => 'tanggal',
+            'placeholder' => 'Pilih tanggal',
+            'required',
+            'autocomplete' => 'off'
+        ]) !!}
+    </div>
 </div>
 
 <!-- Tipe Field -->
@@ -104,7 +109,18 @@
 
 @push('scripts')
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+$(function() {
+    // Initialize datepicker for tanggal field
+    $('#tanggal').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        locale: {
+            format: 'YYYY-MM-DD',
+            applyLabel: 'Pilih',
+            cancelLabel: 'Batal'
+        }
+    });
+
     const tipeSelect = document.querySelector('#tipe');
     const formPendapatan = document.getElementById('form-pendapatan');
     const formPengeluaran = document.getElementById('form-pengeluaran');
@@ -153,7 +169,9 @@ $(document).ready(function() {
                 $.each(data, function(id, nama) {
                     $('#siswa_id').append('<option value="' + id + '">' + nama + '</option>');
                 });
-                $('#siswa_id').selectpicker('refresh');
+                if(typeof $.fn.selectpicker !== 'undefined') {
+                    $('#siswa_id').selectpicker('refresh');
+                }
             });
         }
     });
@@ -168,7 +186,9 @@ $(document).ready(function() {
                 $.each(data, function(id, tagihan) {
                     $('#tagihan_id').append('<option value="'+id+'">'+tagihan+'</option>');
                 });
-                $('#tagihan_id').selectpicker('refresh');
+                if(typeof $.fn.selectpicker !== 'undefined') {
+                    $('#tagihan_id').selectpicker('refresh');
+                }
             });
         }
     });

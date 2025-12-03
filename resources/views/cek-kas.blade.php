@@ -25,14 +25,14 @@
                     <label class="form-label">Tanggal Awal</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                        <input type="date" name="from" class="form-control" value="{{ $from }}" required>
+                        <input type="text" name="from" class="form-control datepicker-default" value="{{ $from }}" placeholder="Pilih tanggal" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Tanggal Akhir</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                        <input type="date" name="to" class="form-control" value="{{ $to }}" required>
+                        <input type="text" name="to" class="form-control datepicker-default" value="{{ $to }}" placeholder="Pilih tanggal" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
@@ -190,13 +190,24 @@
 @endpush
 
 @push('scripts')
-    {{-- jQuery (jika belum ada), DataTables + Buttons JS (CDN) --}}
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    {{-- DataTables + Buttons JS (CDN) --}}
     <script src="https://cdn.datatables.net/v/bs5/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-wZq9cC9b6mCw3z3BzCz+0jWyyM0KBLiKfD6w3m4mV2q2GQ4v3Cw2p8c0m9QW2+QJz0Z8JwN3xTksd7Hq0mJQFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        $(function() {
+            // Initialize datepicker
+            $('input[name="from"], input[name="to"]').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: 'Pilih',
+                    cancelLabel: 'Batal'
+                }
+            });
+
+            // DataTable initialization
             const table = new DataTable('#kasTable', {
                 responsive: true,
                 pageLength: 25,

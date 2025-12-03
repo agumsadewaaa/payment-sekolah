@@ -53,12 +53,28 @@
                             @enderror
                         </div>
 
+
                         <div class="input-group mb-3">
                             <input type="password" name="password_confirmation" class="form-control"
                                 placeholder="Retype password">
                             <div class="input-group-append">
                                 <div class="input-group-text"><span class="fas fa-lock"></span></div>
                             </div>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <select name="role" class="form-control @error('role') is-invalid @enderror">
+                                <option value="user" selected>User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <div class="input-group-append">
+                                <div class="input-group-text"><span class="fas fa-user-tag"></span></div>
+                            </div>
+                            @error('role')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
 
                         <div class="row">
