@@ -60,11 +60,18 @@
                                 <strong>{{ $siswa->nisn }}</strong>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mb-3">
                             <i class="fas fa-school text-primary me-3" style="font-size: 20px;"></i>
                             <div>
                                 <small class="text-muted d-block">Kelas</small>
-                                <strong>{{ $siswa->kelas_format }}</strong>
+                                <strong>{{ $siswa->kelas }}</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-book text-primary me-3" style="font-size: 20px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Jurusan</small>
+                                <strong>{{ $siswa->jurusans ? $siswa->jurusans->jurusan : '-' }}</strong>
                             </div>
                         </div>
                     </div>

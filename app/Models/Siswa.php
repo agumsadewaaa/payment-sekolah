@@ -100,14 +100,5 @@ class Siswa extends Model
 
         return $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
     }
-
-    // Helper untuk menampilkan kelas dalam format "10-TKJ"
-    public function getKelasFormatAttribute()
-    {
-        if ($this->jurusans && $this->jurusans->kode) {
-            return $this->jurusans->kode;
-        }
-        return $this->kelas;
-    }
 }
 

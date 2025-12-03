@@ -19,7 +19,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $siswa->nama }}</td>
                     <td>{{ $siswa->nisn }}</td>
-                    <td>{{ $siswa->kelas_format }}</td>
+                    <td>{{ $siswa->kelas }}</td>
                     <td>{{ $siswa->jurusans ? $siswa->jurusans->jurusan : '-' }}</td>
                     <td>
                         @php
