@@ -140,20 +140,17 @@ class SiswaController extends AppBaseController
     {
         $siswa = Siswa::findOrFail($siswa_id);
 
-        // Ambil SEMUA tagihan yang pernah berlaku untuk siswa ini
-        // Termasuk tagihan dari kelas sebelumnya yang belum lunas (carry-over)
-        $tagihanBelumLunas = Tagihan::whereHas('kasSiswa', function ($q) use ($siswa_id) {
-                $q->where('siswa_id', $siswa_id);
-            }, '>=', 0) // tagihan yang pernah ada pembayaran dari siswa ini
-            ->orWhere('kelas', $siswa->jurusan) // ATAU tagihan kelas saat ini
+        // Ambil tagihan yang belum lunas untuk siswa ini
+        // Filter berdasarkan kelas (jurusan) siswa saat ini
+        $tagihanBelumLunas = Tagihan::where('kelas', $siswa->jurusan)
             ->get()
             ->filter(function ($tagihan) use ($siswa_id) {
-                // Hitung total pembayaran di kas siswa untuk tagihan ini
+                // Hitung total pembayaran untuk tagihan ini
                 $totalBayar = $tagihan->kasSiswa()
                     ->where('siswa_id', $siswa_id)
                     ->sum('nominal');
 
-                // Tagihan tetap muncul kalau total bayar < nominal tagihan (belum lunas)
+                // Tampilkan jika belum lunas
                 return $totalBayar < $tagihan->nominal;
             })
             ->pluck('tagihan', 'id');

@@ -10,7 +10,7 @@
 
 <!-- Tagihan Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('tagihan', 'Tagihan:') !!}<span class="text-danger">*</span>
+    {!! Form::label('tagihan', 'Nama Tagihan:') !!}<span class="text-danger">*</span>
     {!! Form::text('tagihan', null, ['class' => 'form-control', 'required']) !!}
 </div>
 

@@ -13,7 +13,13 @@
 <!-- Kontak Ortu Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('kontak_ortu', 'Kontak Ortu:') !!}<span class="text-danger">*</span>
-    {!! Form::text('kontak_ortu', null, ['class' => 'form-control', 'required']) !!}
+    {!! Form::text('kontak_ortu', null, [
+        'class' => 'form-control', 
+        'required',
+        'pattern' => '[0-9]+',
+        'title' => 'Hanya boleh angka',
+        'inputmode' => 'numeric'
+    ]) !!}
 </div>
 
 <!-- Kelas Field -->
@@ -54,9 +60,16 @@
 </div>
 
 <!-- Status Siswa Field -->
-<div class="form-group col-sm-6"><span class="text-danger">*</span>
-    {!! Form::label('status_siswa', 'Status Siswa:') !!}
-    {!! Form::text('status_siswa', null, ['class' => 'form-control', 'required']) !!}
+<div class="form-group col-sm-6">
+    {!! Form::label('status_siswa', 'Status Siswa:') !!}<span class="text-danger">*</span>
+    {!! Form::select('status_siswa', [
+        'aktif' => 'Aktif',
+        'tidak aktif' => 'Tidak Aktif'
+    ], null, [
+        'class' => 'form-control',
+        'placeholder' => 'Pilih status',
+        'required'
+    ]) !!}
 </div>
 
 @push('scripts')

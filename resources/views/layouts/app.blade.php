@@ -275,6 +275,9 @@
 
 	<script src="{{ asset('js/custom.min.js') }}"></script>
 	<script src="{{ asset('js/deznav-init.js') }}"></script>
+	
+	<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 	<!-- momment js is must -->
 	<script src="{{ asset('vendor/moment/moment.min.js') }}"></script>
@@ -345,6 +348,66 @@
 	</script>
 
 	@stack('scripts')
+	
+	{{-- Global Notification Handler --}}
+	<script>
+		@if(session('success'))
+			Swal.fire({
+				icon: 'success',
+				title: 'Berhasil!',
+				text: '{{ session('success') }}',
+				timer: 3000,
+				showConfirmButton: false,
+				toast: true,
+				position: 'top-end'
+			});
+		@endif
+
+		@if(session('error'))
+			Swal.fire({
+				icon: 'error',
+				title: 'Gagal!',
+				text: '{{ session('error') }}',
+				timer: 3000,
+				showConfirmButton: false,
+				toast: true,
+				position: 'top-end'
+			});
+		@endif
+
+		@if(session('warning'))
+			Swal.fire({
+				icon: 'warning',
+				title: 'Perhatian!',
+				text: '{{ session('warning') }}',
+				timer: 3000,
+				showConfirmButton: false,
+				toast: true,
+				position: 'top-end'
+			});
+		@endif
+
+		@if(session('info'))
+			Swal.fire({
+				icon: 'info',
+				title: 'Info',
+				text: '{{ session('info') }}',
+				timer: 3000,
+				showConfirmButton: false,
+				toast: true,
+				position: 'top-end'
+			});
+		@endif
+
+		@if($errors->any())
+			Swal.fire({
+				icon: 'error',
+				title: 'Validasi Gagal!',
+				html: '<ul style="text-align: left;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+				showConfirmButton: true
+			});
+		@endif
+	</script>
 </body>
 
 </html>

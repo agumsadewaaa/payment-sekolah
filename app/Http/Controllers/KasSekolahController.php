@@ -51,6 +51,11 @@ class KasSekolahController extends AppBaseController
     public function store(CreateKasSekolahRequest $request)
     {
         $input = $request->all();
+        
+        // Bersihkan format nominal (hapus Rp, titik, koma)
+        if(isset($input['nominal'])) {
+            $input['nominal'] = preg_replace('/[^0-9]/', '', $input['nominal']);
+        }
 
         if($input['tipe'] == '1') {
             // Ambil kelas, siswa, dan tagihan
@@ -68,7 +73,10 @@ class KasSekolahController extends AppBaseController
             // Cek apakah pembayaran melebihi sisa
             if ($input['nominal'] > $sisaTagihan) {
                 Flash::error('Pembayaran melebihi sisa tagihan! Sisa tagihan: Rp ' . number_format($sisaTagihan, 0, ',', '.'));
-                return redirect()->back()->withInput();
+                
+                // Kembalikan dengan data kelas untuk dropdown
+                $kelasOptions = \App\Models\Kelas::orderBy('kode', 'asc')->pluck('kode', 'id');
+                return redirect()->back()->withInput()->with('kelas', $kelasOptions);
             }
 
             $kodeKelas = $kelas->kode ?? '';
@@ -150,8 +158,15 @@ class KasSekolahController extends AppBaseController
 
             return redirect(route('kas-sekolahs.index'));
         }
+        
+        $input = $request->all();
+        
+        // Bersihkan format nominal (hapus Rp, titik, koma)
+        if(isset($input['nominal'])) {
+            $input['nominal'] = preg_replace('/[^0-9]/', '', $input['nominal']);
+        }
 
-        $kasSekolah = $this->kasSekolahRepository->update($request->all(), $id);
+        $kasSekolah = $this->kasSekolahRepository->update($input, $id);
 
         Flash::success('Kas Sekolah updated successfully.');
 

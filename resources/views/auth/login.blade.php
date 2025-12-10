@@ -199,9 +199,9 @@
             <!-- Left Side -->
             <div class="login-aside-left">
                 <div class="login-description">
-                    <p class="sub-title">Sistem Informasi Akademik</p>
+                    <p class="sub-title">Sistem Informasi Keuangan</p>
                     <h1>SMK YPE <span>Sampang</span></h1>
-                    <p>Silakan login dengan akun Anda untuk melanjutkan ke dashboard dan mengelola data akademik dengan mudah.</p>
+                    <p>Silakan login dengan akun Anda untuk melanjutkan ke dashboard dan mengelola data keuangan akademik dengan mudah.</p>
                 </div>
             </div>
 

@@ -150,6 +150,11 @@ $(function() {
 
     tipeSelect.addEventListener('change', toggleForm);
     toggleForm();
+    
+    // Auto-trigger jika ada old input (setelah error/validation fail)
+    @if(old('kelas'))
+        $('#kelas').val('{{ old('kelas') }}').trigger('change');
+    @endif
 
     // formatting for nominal inputs is handled via shared partial
 });

@@ -27,10 +27,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // Send daily activity report for yesterday at 00:01
-        // $schedule->command('report:activity-yesterday')->dailyAt('00:01');
-        
-        // TESTING: Run every 5 minutes
-        $schedule->command('report:activity-yesterday')->everyFiveMinutes();
+        $schedule->command('report:activity-yesterday')->dailyAt('00:01');
     }
 
     /**
