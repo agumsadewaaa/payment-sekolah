@@ -46,3 +46,17 @@
         <span>Admin</span>
     </a>
 </li>
+
+@role('super-admin')
+<li><a href="{{ route('users.index') }}" class="ai-icon">
+        <i class="flaticon-381-user"></i>
+        <span>User Management</span>
+    </a>
+</li>
+
+<li><a href="{{ route('activity-logs.index') }}" class="ai-icon">
+        <i class="flaticon-381-file"></i>
+        <span>Activity Log</span>
+    </a>
+</li>
+@endrole

@@ -70,5 +70,9 @@ Route::middleware(['auth'])->group(function () {
     // admin-only area
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:admin');
     Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin');
+
+    // super-admin only area
+    Route::resource('users', App\Http\Controllers\UserController::class)->middleware('role:super-admin');
+    Route::resource('activity-logs', App\Http\Controllers\ActivityLogController::class)->only(['index', 'show'])->middleware('role:super-admin');
 });
 
