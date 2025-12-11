@@ -19,8 +19,8 @@ class SiswaController extends AppBaseController
     public function __construct(SiswaRepository $siswaRepo)
     {
         $this->siswaRepository = $siswaRepo;
-        // only admin may create/update/delete siswa records
-        $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        // only admin and super-admin may create/update/delete siswa records
+        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

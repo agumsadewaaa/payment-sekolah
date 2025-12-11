@@ -12,13 +12,13 @@
                 </ol>
             </nav>
         </div>
-        @role('admin')
+        @hasanyrole('admin|super-admin')
         <div>
             <a class="btn btn-primary" href="{{ route('tagihans.create') }}">
                 <i class="fas fa-plus me-1"></i>Tambah Tagihan
             </a>
         </div>
-        @endrole
+        @endhasanyrole
     </div>
 
     <div class="row">

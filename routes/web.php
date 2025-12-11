@@ -67,9 +67,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cek-kas', [CekKasController::class, 'index'])->name('cek-kas');
     Route::get('/cek-kas/export', [CekKasController::class, 'export'])->name('kas.export');
 
-    // admin-only area
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:admin');
-    Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin');
+    // admin-only area (accessible by admin and super-admin)
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:admin|super-admin');
+    Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin|super-admin');
 
     // super-admin only area
     Route::resource('users', App\Http\Controllers\UserController::class)->middleware('role:super-admin');

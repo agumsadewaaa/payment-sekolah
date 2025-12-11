@@ -57,7 +57,7 @@
                             <a href="{{ route('siswas.show', $siswa->id) }}" class='btn btn-default btn-xs'>
                                 <i class="far fa-eye"></i>
                             </a>
-                            @role('admin')
+                            @hasanyrole('admin|super-admin')
                                 <a href="{{ route('siswas.edit', $siswa->id) }}" class='btn btn-default btn-xs'>
                                     <i class="far fa-edit"></i>
                                 </a>
@@ -68,7 +68,7 @@
                                         'onclick' => "return confirm('Are you sure?')"
                                     ]) !!}
                                 {!! Form::close() !!}
-                            @endrole
+                            @endhasanyrole
                         </div>
                     </td>
                 </tr>

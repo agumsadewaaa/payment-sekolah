@@ -14,11 +14,11 @@
             </nav>
         </div>
         <div>
-            @role('admin')
+            @hasanyrole('admin|super-admin')
             <a class="btn btn-warning me-2" href="{{ route('siswas.edit', $siswa->id) }}">
                 <i class="fas fa-edit me-1"></i>Edit
             </a>
-            @endrole
+            @endhasanyrole
             <a class="btn btn-secondary" href="{{ route('siswas.index') }}">
                 <i class="fas fa-arrow-left me-1"></i>Kembali
             </a>
