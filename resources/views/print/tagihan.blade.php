@@ -39,7 +39,9 @@
         <table>
             <tr>
                 <td style="width:100px; text-align:center;">
-                    <img src="https://keuangankitayesa.com/logo.jpg" alt="Logo Sekolah" style="width:90px; height:auto;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" alt="Logo Sekolah" style="width:90px; height:auto;">
+                    @endif
                 </td>
                 <td style="text-align:center;">
                     <div style="font-size:14px; font-weight:bold;">YAYASAN PENDIDIKAN EKONOMI (YPE)</div>

@@ -150,6 +150,14 @@ class CekTagihanController extends Controller
         $totalSisa = max(0, $totalTagihan - $totalBayar);
         $progress = $totalTagihan > 0 ? round(($totalBayar / $totalTagihan) * 100, 2) : 0;
 
+        // Convert logo to base64 untuk print (DomPDF tidak bisa load external image)
+        $logoPath = public_path('logo.jpg');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/jpeg;base64,' . base64_encode($logoData);
+        }
+
         $pdf = PDF::loadView('print.tagihan', [
             'siswa'        => $siswa,
             'belum'        => $belum,
@@ -158,6 +166,7 @@ class CekTagihanController extends Controller
             'totalBayar'   => $totalBayar,
             'totalSisa'    => $totalSisa,
             'progress'     => $progress,
+            'logoBase64'   => $logoBase64,
         ])->setPaper('A4','portrait');
 
         return $pdf->stream("tagihan-{$siswa->nisn}.pdf");
