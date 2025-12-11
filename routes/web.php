@@ -72,6 +72,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin|super-admin');
 
     // super-admin only area
+    Route::get('/activity-logs-debug', function() {
+        return view('activity_logs.debug');
+    })->middleware('role:super-admin');
     Route::resource('users', App\Http\Controllers\UserController::class)->middleware('role:super-admin');
     Route::resource('activity-logs', App\Http\Controllers\ActivityLogController::class)->only(['index', 'show'])->middleware('role:super-admin');
 });

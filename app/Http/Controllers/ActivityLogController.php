@@ -20,6 +20,10 @@ class ActivityLogController extends Controller
     {
         $query = ActivityLog::with('user')->orderBy('created_at', 'desc');
 
+        // Debug: show raw count
+        $totalLogs = ActivityLog::count();
+        \Log::info('Total Activity Logs in DB: ' . $totalLogs);
+
         // Filter by user
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
@@ -44,6 +48,10 @@ class ActivityLogController extends Controller
         }
 
         $logs = $query->paginate(20);
+
+        // Debug: check if logs exist
+        \Log::info('Activity Logs Count: ' . $logs->total());
+        \Log::info('Current Page: ' . $logs->currentPage());
 
         // Get unique users for filter
         $users = \App\Models\User::orderBy('name')->get();
