@@ -167,9 +167,9 @@
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light sticky-top">
                                 <tr>
                                     <th class="px-3">Nama Siswa</th>
                                     <th class="px-3">Kelas</th>
@@ -228,9 +228,9 @@
                     <strong>Pengeluaran Terbaru</strong>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light sticky-top">
                                 <tr>
                                     <th class="px-3">Tanggal</th>
                                     <th class="px-3">Catatan</th>

@@ -7,7 +7,16 @@
 <!-- NISN Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('nisn', 'NISN:') !!}<span class="text-danger">*</span>
-    {!! Form::number('nisn', null, ['class' => 'form-control', 'required']) !!}
+    {!! Form::text('nisn', null, [
+        'class' => 'form-control', 
+        'required',
+        'maxlength' => '20',
+        'pattern' => '[0-9]+',
+        'title' => 'Hanya boleh angka',
+        'inputmode' => 'numeric',
+        'placeholder' => 'Contoh: 0051234567'
+    ]) !!}
+    <small class="form-text text-muted">NISN bisa dimulai dengan angka 0</small>
 </div>
 
 <!-- Kontak Ortu Field -->

@@ -70,11 +70,10 @@ Route::middleware(['auth'])->group(function () {
     // admin-only area (accessible by admin and super-admin)
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:admin|super-admin');
     Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin|super-admin');
+    Route::get('/admin/download-template', [AdminController::class, 'downloadTemplate'])->name('admin.download-template')->middleware('role:admin|super-admin');
+    Route::post('/admin/import-siswa', [AdminController::class, 'importSiswa'])->name('admin.import-siswa')->middleware('role:admin|super-admin');
 
     // super-admin only area
-    Route::get('/activity-logs-debug', function() {
-        return view('activity_logs.debug');
-    })->middleware('role:super-admin');
     Route::resource('users', App\Http\Controllers\UserController::class)->middleware('role:super-admin');
     Route::resource('activity-logs', App\Http\Controllers\ActivityLogController::class)->only(['index', 'show'])->middleware('role:super-admin');
 });

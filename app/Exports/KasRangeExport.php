@@ -93,8 +93,48 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
         $periode = Carbon::parse($this->from)->format('d-M-Y')
             .' s.d. '.Carbon::parse($this->to)->format('d-M-Y');
 
+        // Generate judul dinamis berdasarkan bulan periode
+        $fromCarbon = Carbon::parse($this->from);
+        $toCarbon = Carbon::parse($this->to);
+        
+        $fromMonth = $fromCarbon->format('F'); // Nama bulan penuh dalam bahasa Inggris
+        $toMonth = $toCarbon->format('F');
+        $fromYear = $fromCarbon->format('Y');
+        $toYear = $toCarbon->format('Y');
+        
+        // Konversi nama bulan ke Bahasa Indonesia
+        $bulanIndo = [
+            'January' => 'JANUARI',
+            'February' => 'FEBRUARI',
+            'March' => 'MARET',
+            'April' => 'APRIL',
+            'May' => 'MEI',
+            'June' => 'JUNI',
+            'July' => 'JULI',
+            'August' => 'AGUSTUS',
+            'September' => 'SEPTEMBER',
+            'October' => 'OKTOBER',
+            'November' => 'NOVEMBER',
+            'December' => 'DESEMBER'
+        ];
+        
+        $fromBulan = $bulanIndo[$fromMonth] ?? strtoupper($fromMonth);
+        $toBulan = $bulanIndo[$toMonth] ?? strtoupper($toMonth);
+        
+        // Tentukan format judul
+        if ($fromMonth === $toMonth && $fromYear === $toYear) {
+            // Bulan dan tahun sama: DESEMBER 2025
+            $judulPeriode = "$fromBulan $fromYear";
+        } elseif ($fromYear === $toYear) {
+            // Tahun sama tapi bulan beda: NOVEMBER-DESEMBER 2025
+            $judulPeriode = "$fromBulan-$toBulan $fromYear";
+        } else {
+            // Tahun berbeda: DESEMBER 2024-JANUARI 2025
+            $judulPeriode = "$fromBulan $fromYear-$toBulan $toYear";
+        }
+
         return [
-            ['KAS SMK YPE BLN APRIL-MEI 2025'], // ganti sesuai kebutuhan
+            ["KAS SMK YPE SAMPANG BLN $judulPeriode"],
             [$periode],
             ['Tanggal','Catatan','Pendapatan','Pengeluaran','Saldo'],
         ];

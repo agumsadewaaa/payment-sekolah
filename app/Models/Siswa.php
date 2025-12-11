@@ -23,13 +23,13 @@ class Siswa extends Model
     ];
 
     public static array $rules = [
-        'nama' => 'required',
-        'nisn' => 'required',
-        'kontak_ortu' => 'required',
-        'kelas' => 'required',
+        'nama' => 'required|string|max:255',
+        'nisn' => 'required|string|max:20',
+        'kontak_ortu' => 'required|string|max:20',
+        'kelas' => 'required|integer',
         'jurusan' => 'required',
-        'tahun_masuk' => 'required',
-        'status_siswa' => 'required'
+        'tahun_masuk' => 'required|integer|min:2000|max:2100',
+        'status_siswa' => 'required|string'
     ];
 
     // Relasi: Siswa -> Kelas (Jurusan)

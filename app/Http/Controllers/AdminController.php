@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Imports\SiswaImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -68,5 +71,46 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.index')
             ->with('status', "Kenaikan kelas & kelulusan siswa berhasil diproses untuk tahun {$year}.");
+    }
+
+    public function downloadTemplate()
+    {
+        $filePath = public_path('templates/template_import_siswa.xlsx');
+        
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'Template file tidak ditemukan');
+        }
+
+        return response()->download($filePath, 'Template_Import_Siswa.xlsx');
+    }
+
+    public function importSiswa(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048'
+        ]);
+
+        try {
+            Excel::import(new SiswaImport, $request->file('file'));
+
+            return redirect()
+                ->route('admin.index')
+                ->with('success', 'Data siswa berhasil diimport!');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            
+            foreach ($failures as $failure) {
+                $errors[] = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
+            }
+
+            return redirect()
+                ->back()
+                ->with('error', 'Import gagal: ' . implode('<br>', $errors));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
     }
 }
