@@ -10,8 +10,8 @@ class ActivityObserver
     public function created($model)
     {
         $user = Auth::user();
-        // only log if action triggered by an authenticated admin
-        if (! $user || ! method_exists($user, 'hasRole') || ! $user->hasRole('admin')) {
+        // only log if action triggered by an authenticated admin or super-admin
+        if (! $user || ! method_exists($user, 'hasRole') || ! ($user->hasRole('admin') || $user->hasRole('super-admin'))) {
             return;
         }
 
@@ -26,7 +26,7 @@ class ActivityObserver
     public function updated($model)
     {
         $user = Auth::user();
-        if (! $user || ! method_exists($user, 'hasRole') || ! $user->hasRole('admin')) {
+        if (! $user || ! method_exists($user, 'hasRole') || ! ($user->hasRole('admin') || $user->hasRole('super-admin'))) {
             return;
         }
 
@@ -44,7 +44,7 @@ class ActivityObserver
     public function deleted($model)
     {
         $user = Auth::user();
-        if (! $user || ! method_exists($user, 'hasRole') || ! $user->hasRole('admin')) {
+        if (! $user || ! method_exists($user, 'hasRole') || ! ($user->hasRole('admin') || $user->hasRole('super-admin'))) {
             return;
         }
 
