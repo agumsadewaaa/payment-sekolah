@@ -30,7 +30,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
+        // Filter: hanya tampilkan admin dan user, hide super-admin
+        $roles = Role::whereIn('name', ['admin', 'user'])->get();
         return view('users.create', compact('roles'));
     }
 
@@ -73,8 +74,14 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
+        
+        // Filter: hanya tampilkan admin dan user, hide super-admin
+        $roles = Role::whereIn('name', ['admin', 'user'])->get();
+        
+        // Cek apakah user yang login adalah super-admin dan sedang edit diri sendiri
+        $isEditingSelf = auth()->user()->hasRole('super-admin') && auth()->id() == $id;
+        
+        return view('users.edit', compact('user', 'roles', 'isEditingSelf'));
     }
 
     /**
@@ -100,8 +107,13 @@ class UserController extends Controller
 
         $user->save();
 
-        // Update role
-        $user->syncRoles([$request->role]);
+        // Update role - kecuali jika super-admin edit diri sendiri
+        $isEditingSelf = auth()->user()->hasRole('super-admin') && auth()->id() == $id;
+        
+        if (!$isEditingSelf) {
+            $user->syncRoles([$request->role]);
+        }
+        // Jika super-admin edit diri sendiri, role tetap super-admin (tidak diubah)
 
         Flash::success('User berhasil diupdate.');
         return redirect()->route('users.index');

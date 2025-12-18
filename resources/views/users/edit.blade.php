@@ -51,14 +51,23 @@
 
                         <div class="mb-3">
                             <label for="role" class="form-label">Role<span class="text-danger">*</span></label>
-                            <select class="form-select" id="role" name="role" required>
+                            <select class="form-select" id="role" name="role" required {{ isset($isEditingSelf) && $isEditingSelf ? 'disabled' : '' }}>
                                 <option value="">Pilih Role</option>
                                 @foreach($roles as $role)
                                 <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
                                     {{ ucfirst($role->name) }}
                                 </option>
                                 @endforeach
+                                @if($user->hasRole('super-admin'))
+                                <option value="super-admin" selected>Super Admin</option>
+                                @endif
                             </select>
+                            @if(isset($isEditingSelf) && $isEditingSelf)
+                            <small class="text-info"><i class="fas fa-info-circle me-1"></i>Anda tidak dapat mengubah role Anda sendiri sebagai Super Admin</small>
+                            <input type="hidden" name="role" value="super-admin">
+                            @else
+                            <small class="text-muted">Pilih role untuk user ini</small>
+                            @endif
                         </div>
                     </div>
 
