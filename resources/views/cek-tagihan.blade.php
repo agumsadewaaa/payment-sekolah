@@ -57,7 +57,7 @@
                             <i class="fas fa-id-card text-primary me-3" style="font-size: 20px;"></i>
                             <div>
                                 <small class="text-muted d-block">NISN</small>
-                                <strong>{{ $siswa->nisn }}</strong>
+                                <strong style="font-family: monospace;">{{ $siswa->nisn }}</strong>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">

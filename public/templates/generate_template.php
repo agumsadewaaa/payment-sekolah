@@ -36,9 +36,8 @@ $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
 
 // Set contoh data (mulai dari baris 2)
 $contohData = [
-    ['Budi Santoso', '0051234567', '081234567890', '10', 'IPA', '2024'],
-    ['Ani Putri', '0051234568', '081298765432', '10', 'IPS', '2024'],
-    ['Ahmad Zaki', '0051234569', '081345678901', '11', 'IPA', '2023'],
+    ['Budi Santoso', "'0051234567", "'081234567890", '10', 'Teknologi Komputer Jaringan', '2025'],
+    ['Ani Putri', "'0051234568", "'081298765432", '10', 'Akuntansi', '2025'],
 ];
 
 $row = 2;

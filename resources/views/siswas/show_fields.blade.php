@@ -9,7 +9,7 @@
     <div class="col-md-6">
         <div class="p-3 bg-light rounded">
             <label class="text-muted small mb-1"><i class="fas fa-id-card me-2"></i>NISN</label>
-            <h5 class="mb-0">{{ $siswa->nisn }}</h5>
+            <h5 class="mb-0" style="font-family: monospace;">{{ $siswa->nisn }}</h5>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
     <div class="col-md-6">
         <div class="p-3 bg-light rounded">
             <label class="text-muted small mb-1"><i class="fas fa-phone me-2"></i>Kontak Orang Tua</label>
-            <h5 class="mb-0">{{ $siswa->kontak_ortu }}</h5>
+            <h5 class="mb-0" style="font-family: monospace;">{{ $siswa->kontak_ortu }}</h5>
         </div>
     </div>
 

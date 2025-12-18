@@ -18,7 +18,7 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $siswa->nama }}</td>
-                    <td>{{ $siswa->nisn }}</td>
+                    <td><span style="font-family: monospace;">{{ $siswa->nisn }}</span></td>
                     <td>{{ $siswa->kelas }}</td>
                     <td>{{ $siswa->jurusans ? $siswa->jurusans->jurusan : '-' }}</td>
                     <td>

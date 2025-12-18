@@ -70,7 +70,7 @@
     <div class="grid-2">
         <div>
             <div><b>Nama</b>: {{ $siswa->nama }}</div>
-            <div><b>NISN</b>: {{ $siswa->nisn }}</div>
+            <div><b>NISN</b>: <span style="font-family: 'Courier New', monospace;">{{ $siswa->nisn }}</span></div>
         </div>
         <div>
             <div><b>Kelas</b>: {{ $siswa->kelas }}</div>

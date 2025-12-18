@@ -40,7 +40,8 @@ class Siswa extends Model
 
     protected $casts = [
         'id' => 'integer',
-        'nisn' => 'integer',
+        'nisn' => 'string',
+        'kontak_ortu' => 'string',
         'kelas' => 'integer',
         'jurusan' => 'integer',
         'tahun_masuk' => 'integer',

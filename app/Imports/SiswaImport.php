@@ -36,8 +36,12 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 throw new \Exception("Baris " . ($index + 2) . ": Jurusan wajib diisi");
             }
 
-            // Pastikan NISN disimpan sebagai string untuk preserve leading zeros
+            // NISN disimpan sebagai string untuk preserve leading zeros
+            // Excel format TEXT sudah menjaga angka 0 di depan
             $nisn = trim((string) $row['nisn']);
+            
+            // Kontak ortu juga simpan sebagai string
+            $kontakOrtu = isset($row['kontak_ortu']) ? trim((string) $row['kontak_ortu']) : null;
 
             // Cek NISN sudah ada atau belum
             if (Siswa::where('nisn', $nisn)->exists()) {
@@ -57,7 +61,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
             Siswa::create([
                 'nama' => trim($row['nama']),
                 'nisn' => $nisn,
-                'kontak_ortu' => isset($row['kontak_ortu']) ? trim((string) $row['kontak_ortu']) : null,
+                'kontak_ortu' => $kontakOrtu,
                 'kelas' => $row['kelas'],
                 'jurusan' => $kelas->id,
                 'tahun_masuk' => $row['tahun_masuk'] ?? date('Y'),

@@ -14,7 +14,8 @@
         'pattern' => '[0-9]+',
         'title' => 'Hanya boleh angka',
         'inputmode' => 'numeric',
-        'placeholder' => 'Contoh: 0051234567'
+        'placeholder' => 'Contoh: 0051234567',
+        'style' => 'font-family: monospace;'
     ]) !!}
     <small class="form-text text-muted">NISN bisa dimulai dengan angka 0</small>
 </div>
@@ -27,7 +28,9 @@
         'required',
         'pattern' => '[0-9]+',
         'title' => 'Hanya boleh angka',
-        'inputmode' => 'numeric'
+        'inputmode' => 'numeric',
+        'style' => 'font-family: monospace;',
+        'placeholder' => 'Contoh: 081234567890'
     ]) !!}
 </div>
 

@@ -59,9 +59,15 @@
             </div>
 
             <div class="mb-3">
-                <a href="{{ route('admin.download-template') }}" class="btn btn-info">
+                <a href="{{ route('admin.download-template') }}" class="btn btn-info me-2">
                     <i class="fas fa-download me-2"></i>Download Template Excel
                 </a>
+                <a href="{{ route('admin.generate-template') }}" class="btn btn-outline-info">
+                    <i class="fas fa-sync-alt me-2"></i>Re-generate Template
+                </a>
+                <small class="d-block mt-2 text-muted">
+                    <i class="fas fa-info-circle me-1"></i>Klik "Re-generate" jika template rusak atau belum ada
+                </small>
             </div>
 
             <hr>

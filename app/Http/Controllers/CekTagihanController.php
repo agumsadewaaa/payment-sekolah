@@ -153,9 +153,23 @@ class CekTagihanController extends Controller
         // Convert logo to base64 untuk print (DomPDF tidak bisa load external image)
         $logoPath = public_path('logo.jpg');
         $logoBase64 = '';
+        
+        // Coba berbagai lokasi logo
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);
             $logoBase64 = 'data:image/jpeg;base64,' . base64_encode($logoData);
+        } elseif (file_exists(public_path('images/logo.jpg'))) {
+            $logoPath = public_path('images/logo.jpg');
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/jpeg;base64,' . base64_encode($logoData);
+        } elseif (file_exists(public_path('logo.png'))) {
+            $logoPath = public_path('logo.png');
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
+        } elseif (file_exists(public_path('images/logo.png'))) {
+            $logoPath = public_path('images/logo.png');
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
         }
 
         $pdf = PDF::loadView('print.tagihan', [

@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:admin|super-admin');
     Route::post('/admin/kenaikan-kelulusan', [AdminController::class, 'promoteAndGraduate'])->name('admin.promote')->middleware('role:admin|super-admin');
     Route::get('/admin/download-template', [AdminController::class, 'downloadTemplate'])->name('admin.download-template')->middleware('role:admin|super-admin');
+    Route::get('/admin/generate-template', [AdminController::class, 'generateTemplate'])->name('admin.generate-template')->middleware('role:admin|super-admin');
     Route::post('/admin/import-siswa', [AdminController::class, 'importSiswa'])->name('admin.import-siswa')->middleware('role:admin|super-admin');
 
     // super-admin only area
