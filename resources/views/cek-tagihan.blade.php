@@ -223,9 +223,9 @@
             </div>
         </div>
 
-    @elseif(request('keyword'))
+    @elseif(isset($error) && $error)
         <div class="alert alert-danger mt-3">
-            Data siswa dengan keyword <strong>{{ request('keyword') }}</strong> tidak ditemukan.
+            {{ $error }}
         </div>
     @endif
 </div>

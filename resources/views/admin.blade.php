@@ -40,33 +40,70 @@
 
     <div class="card">
         <div class="card-header bg-success text-white">
-            <h5 class="mb-0"><i class="fas fa-file-excel me-2"></i>Import Data Siswa dari Excel</h5>
+            <h5 class="mb-0"><i class="fas fa-file-excel me-2"></i>Import Data Siswa & Pembayaran dari Excel</h5>
         </div>
         <div class="card-body">
-            <p class="mb-3">Upload file Excel untuk menambahkan data siswa secara massal.</p>
+            <p class="mb-3">Upload file Excel untuk menambahkan data siswa dan pembayaran tagihan secara massal.</p>
+
+            @if(isset($totalTagihan) && $totalTagihan == 0)
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Perhatian!</strong> Belum ada data tagihan di database.<br>
+                Kolom pembayaran tidak akan muncul di template Excel.<br>
+                Silakan tambahkan data tagihan terlebih dahulu di menu <strong>Kelola Tagihan</strong>, 
+                kemudian klik <strong>Re-generate Template</strong> untuk update template dengan kolom pembayaran.
+            </div>
+            @elseif(isset($totalTagihan))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Ditemukan <strong>{{ $totalTagihan }}</strong> tagihan. Template Excel akan include kolom pembayaran.
+            </div>
+            @endif
 
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
                 <strong>Petunjuk:</strong>
                 <ol class="mb-0 mt-2">
                     <li>Download template Excel terlebih dahulu</li>
-                    <li>Isi data siswa sesuai format: <strong>Nama, NISN, Kontak Ortu, Kelas, Jurusan, Tahun Masuk</strong></li>
+                    <li>Isi data siswa: <strong>Nama, NISN, Kontak Ortu, Kelas, Jurusan, Tahun Masuk</strong></li>
+                    @if(isset($totalTagihan) && $totalTagihan > 0)
+                    <li><strong>FITUR PEMBAYARAN:</strong> Isi kolom tagihan (hijau) untuk pembayaran yang sudah dibayar
+                        <ul>
+                            <li>Isi dengan nominal pembayaran (tanpa titik/koma)</li>
+                            <li>Kosongkan jika belum ada pembayaran</li>
+                            <li>Sistem akan otomatis mencatat pembayaran ke database</li>
+                        </ul>
+                    </li>
+                    @endif
                     <li>Pastikan kombinasi <strong>Kelas dan Jurusan</strong> sudah ada di database</li>
                     <li>NISN harus unik (10 digit) dan belum terdaftar</li>
-                    <li>Hapus 3 baris contoh data sebelum upload</li>
+                    <li>Hapus 2 baris contoh data sebelum upload</li>
                     <li>Upload file yang sudah diisi</li>
                 </ol>
             </div>
+            
+            @if(isset($totalTagihan) && $totalTagihan > 0)
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Keuntungan fitur import pembayaran:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Siswa kelas 12 bisa langsung diinput dengan pembayaran kelas 10 & 11</li>
+                    <li>Tidak perlu input pembayaran manual satu per satu</li>
+                    <li>Data pembayaran akan tersimpan dengan tanggal import</li>
+                    <li>Status pembayaran otomatis "Lunas" untuk nominal yang diisi</li>
+                </ul>
+            </div>
+            @endif
 
             <div class="mb-3">
-                <a href="{{ route('admin.download-template') }}" class="btn btn-info me-2">
+                <a href="{{ route('admin.download-template') }}?t={{ time() }}" class="btn btn-info me-2">
                     <i class="fas fa-download me-2"></i>Download Template Excel
                 </a>
                 <a href="{{ route('admin.generate-template') }}" class="btn btn-outline-info">
                     <i class="fas fa-sync-alt me-2"></i>Re-generate Template
                 </a>
                 <small class="d-block mt-2 text-muted">
-                    <i class="fas fa-info-circle me-1"></i>Klik "Re-generate" jika template rusak atau belum ada
+                    <i class="fas fa-info-circle me-1"></i>Klik "Re-generate" jika template rusak atau belum ada, atau ada perubahan tagihan baru
                 </small>
             </div>
 

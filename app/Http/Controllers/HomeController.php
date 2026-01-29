@@ -22,7 +22,9 @@ class HomeController extends Controller
         [$start, $end, $rangeLabel] = $this->resolveRange($range);
 
         // ===== 2) KARTU LAIN (tetap) =====
-        $totalSiswa = DB::table('tb_siswa')->count();
+        $totalSiswa = DB::table('tb_siswa')
+            ->whereNull('deleted_at')
+            ->count();
 
         // Saldo total kas (all-time)
         $totalKas = DB::table('tb_kas_sekolah')

@@ -8,12 +8,16 @@ use Carbon\Carbon;
 use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Tagihan;
+use App\Models\Kelas;
+use App\Models\Siswa;
 
 class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin');
+        $totalTagihan = Tagihan::count();
+        return view('admin', compact('totalTagihan'));
     }
 
     public function promoteAndGraduate(Request $request)
@@ -77,122 +81,56 @@ class AdminController extends Controller
     {
         $filePath = public_path('templates/template_import_siswa.xlsx');
         
-        // Jika file tidak ada, generate dulu
+        // Hapus file lama jika ada
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        
+        // Generate template baru (tanpa redirect)
+        $this->generateTemplateFile();
+        
+        // Pastikan file sudah ter-generate
         if (!file_exists($filePath)) {
-            $this->generateTemplate();
+            return redirect()->back()->with('error', 'Gagal generate template!');
         }
 
-        return response()->download($filePath, 'Template_Import_Siswa.xlsx');
+        // Download dengan nama file yang unik agar tidak ter-cache browser
+        $downloadName = 'Template_Import_Siswa_' . date('YmdHis') . '.xlsx';
+        
+        return response()->download($filePath, $downloadName, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0'
+        ])->deleteFileAfterSend(false);
     }
 
     public function generateTemplate()
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        // Generate file
+        $this->generateTemplateFile();
+        
+        return redirect()->back()->with('success', 'Template berhasil di-generate!');
+    }
 
-        // Set header kolom di baris pertama (WAJIB untuk WithHeadingRow)
-        $headers = [
-            'A1' => 'Nama',
-            'B1' => 'NISN',
-            'C1' => 'Kontak Ortu',
-            'D1' => 'Kelas',
-            'E1' => 'Jurusan',
-            'F1' => 'Tahun Masuk',
-        ];
-
-        foreach ($headers as $cell => $value) {
-            $sheet->setCellValue($cell, $value);
-        }
-
-        // Style header
-        $headerStyle = [
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
-            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
-        ];
-        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
-
-        // PENTING: Set kolom NISN (B) dan Kontak Ortu (C) sebagai TEXT format
-        // Ini memastikan Excel tidak mengubah angka dengan 0 di depan
-        $sheet->getStyle('B:B')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
-        $sheet->getStyle('C:C')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
-
-        // Set contoh data (mulai dari baris 2) - Hanya 2 contoh
-        $contohData = [
-            ['Budi Santoso', '0051234567', '081234567890', '10', 'Teknologi Komputer Jaringan', '2025'],
-            ['Ani Putri', '0051234568', '081298765432', '10', 'Akuntansi', '2025'],
-        ];
-
-        $row = 2;
-        foreach ($contohData as $data) {
-            $col = 'A';
-            foreach ($data as $value) {
-                // Set NISN dan Kontak sebagai text type
-                if ($col === 'B' || $col === 'C') {
-                    $sheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                } else {
-                    $sheet->setCellValue($col . $row, $value);
-                }
-                $col++;
-            }
-            $row++;
-        }
-
-        // Set lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(25);
-        $sheet->getColumnDimension('B')->setWidth(15);
-        $sheet->getColumnDimension('C')->setWidth(15);
-        $sheet->getColumnDimension('D')->setWidth(10);
-        $sheet->getColumnDimension('E')->setWidth(15);
-        $sheet->getColumnDimension('F')->setWidth(15);
-
-        // Set tinggi baris header
-        $sheet->getRowDimension(1)->setRowHeight(25);
-
-        // Add keterangan
-        $sheet->setCellValue('A' . ($row + 1), 'KETERANGAN:');
-        $sheet->getStyle('A' . ($row + 1))->getFont()->setBold(true);
-
-        $keterangan = [
-            '- Nama: Nama lengkap siswa (wajib)',
-            '- NISN: Nomor Induk Siswa Nasional (wajib, harus unik, 10-20 digit)',
-            '  Kolom ini sudah di-set sebagai TEXT, cukup ketik angka saja: 0051234567',
-            '  Angka 0 di depan akan tetap tersimpan',
-            '- Kontak Ortu: Nomor HP orang tua (opsional)',
-            '  Kolom ini sudah TEXT, ketik langsung: 081234567890',
-            '- Kelas: Angka kelas: 10, 11, atau 12 (wajib)',
-            '- Jurusan: Nama jurusan sesuai database kelas (wajib)',
-            '  Contoh: IPA, IPS, Bahasa, TKJ, RPL, MM, AKL, dll',
-            '- Tahun Masuk: Tahun masuk sekolah (opsional, default tahun sekarang)',
-            '',
-            'CARA MENGGUNAKAN:',
-            '1. Hapus 2 baris contoh data (baris 2-3)',
-            '2. Isi data siswa mulai dari baris 2',
-            '3. Ketik NISN dan Kontak Ortu langsung (TIDAK perlu tanda petik \')',
-            '4. Pastikan kombinasi Kelas dan Jurusan sudah ada di database!',
-            '5. NISN harus unik dan belum terdaftar',
-            '6. Simpan file dan upload di menu Import Excel',
-        ];
-
-        $rowKet = $row + 2;
-        foreach ($keterangan as $ket) {
-            $sheet->setCellValue('A' . $rowKet, $ket);
-            $sheet->mergeCells('A' . $rowKet . ':F' . $rowKet);
-            $rowKet++;
-        }
-
+    private function generateTemplateFile()
+    {
         // Pastikan folder templates ada
         $templatesDir = public_path('templates');
         if (!file_exists($templatesDir)) {
             mkdir($templatesDir, 0755, true);
         }
 
-        // Save file
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save(public_path('templates/template_import_siswa.xlsx'));
+        // Jalankan file generate_template.php
+        $generateFilePath = public_path('templates/generate_template.php');
+        
+        if (!file_exists($generateFilePath)) {
+            throw new \Exception('File generate_template.php tidak ditemukan!');
+        }
 
-        return redirect()->back()->with('success', 'Template berhasil di-generate!');
+        // Execute the generate_template.php file
+        ob_start();
+        include $generateFilePath;
+        $output = ob_get_clean();
     }
 
     public function importSiswa(Request $request)
