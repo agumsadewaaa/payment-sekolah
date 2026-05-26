@@ -195,20 +195,33 @@
                                             <span class="badge bg-info">{{ $siswa->kode }}</span>
                                         </td>
                                         <td class="px-3 align-middle">
-                                            <div class="d-flex align-items-center">
-                                                <div class="progress flex-grow-1 me-2" style="height: 18px;">
-                                                    <div class="progress-bar {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }}" 
-                                                         role="progressbar"
-                                                         style="width: {{ round($siswa->progress) }}%"
-                                                         aria-valuenow="{{ round($siswa->progress) }}" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="100">
-                                                    </div>
+                                            @php
+                                                $isTunggakan = is_string($siswa->progress) && strpos((string)$siswa->progress, '-') === 0;
+                                                $progressValue = $isTunggakan ? ltrim($siswa->progress, '-') : $siswa->progress;
+                                            @endphp
+                                            @if($isTunggakan)
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-danger text-white" style="min-width: 90px; font-size: 0.9rem;">
+                                                        <i class="fas fa-exclamation-circle me-1"></i> -{{ str_replace('.', ',', $progressValue) }}%
+                                                    </span>
+                                                    <small class="text-muted ms-2">(Tunggakan kelas lama)</small>
                                                 </div>
-                                                <span class="badge {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }} text-white" style="min-width: 45px;">
-                                                    {{ round($siswa->progress) }}%
-                                                </span>
-                                            </div>
+                                            @else
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 18px;">
+                                                        <div class="progress-bar {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }}" 
+                                                             role="progressbar"
+                                                             style="width: {{ round($siswa->progress) }}%"
+                                                             aria-valuenow="{{ round($siswa->progress) }}" 
+                                                             aria-valuemin="0" 
+                                                             aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge {{ round($siswa->progress) < 25 ? 'bg-danger' : 'bg-warning' }} text-white" style="min-width: 45px;">
+                                                        {{ round($siswa->progress) }}%
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach

@@ -69,7 +69,7 @@ class ResourceAccessTest extends TestCase
         $this->actingAs($admin)
             ->post('/siswas', [
                 'nama' => 'Test Siswa',
-                'nisn' => '1234567890',
+                'nis' => '1234567890',
                 'kontak_ortu' => '0812345678',
                 'kelas' => '10',
                 'jurusan' => $kelas->id,

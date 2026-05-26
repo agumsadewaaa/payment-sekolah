@@ -346,6 +346,17 @@
 		});
 	</script>
 
+	<script>
+		$(document).ready(function() {
+			$('.selectpicker').selectpicker({
+				liveSearch: true,
+				liveSearchNormalize: true,
+				liveSearchPlaceholder: 'Cari...',
+				noneResultsText: 'Tidak ditemukan',
+			});
+		});
+	</script>
+
 	@stack('scripts')
 	
 	{{-- Bootstrap Alert akan ditampilkan di halaman --}}

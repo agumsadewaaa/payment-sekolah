@@ -28,6 +28,15 @@
         .pagenum:before { content: counter(page); }
         .pagecount:before { content: counter(pages); }
 
+        .signature-section { margin-top:60px; margin-right:0; text-align:center; width:140px; margin-left:auto; }
+        .signature-section .sig-label { font-size:11px; line-height:1.4; }
+        .signature-section .sig-label-head { font-weight:bold; margin:4px 0; }
+        .signature-section img { width:200px; height:auto; margin:0 8px; display:block; }
+        .signature-section .divider { border-top:1px solid #000; margin:4px 0 4px 0; }
+        .signature-section .sig-name { font-weight:bold; font-size:12px; margin-top:4px; }
+        
+        .content-wrapper { margin-bottom:80px; }
+
         @media print { .no-print { display:none } }
     </style>
 </head>
@@ -70,12 +79,17 @@
     <div class="grid-2">
         <div>
             <div><b>Nama</b>: {{ $siswa->nama }}</div>
-            <div><b>NISN</b>: <span style="font-family: 'Courier New', monospace;">{{ $siswa->nisn }}</span></div>
+            <div><b>NIS</b>: <span style="font-family: 'Courier New', monospace;">{{ $siswa->nis }}</span></div>
         </div>
         <div>
-            <div><b>Kelas</b>: {{ $siswa->kelas }}</div>
+            <div><b>Kelas</b>: {{ $siswa->kelas == 0 ? 'Lulus' : $siswa->kelas }}</div>
             <div><b>Jurusan</b>: {{ $siswa->jurusans ? $siswa->jurusans->jurusan : '-' }}</div>
         </div>
+    </div>
+
+    {{-- TANGGAL PRINT --}}
+    <div style="margin: 8px 0; padding: 4px 0; font-size: 11px; color: #666; text-align: right; border-bottom: 1px dotted #999;">
+        Dicetak: {{ now()->format('d M Y H:i') }}
     </div>
 
     {{-- RINGKASAN PEMBAYARAN --}}
@@ -88,7 +102,17 @@
             </div>
             <div>
                 <div><b>Sisa Tagihan</b>: Rp {{ number_format($totalSisa, 0, ',', '.') }}</div>
-                <div><b>Progress</b>: {{ round($progress) }}%</div>
+                <div><b>Progress</b>: 
+                    @php
+                        $isTunggakan = is_string($progress) && strpos((string)$progress, '-') === 0;
+                        $progressValue = $isTunggakan ? ltrim($progress, '-') : $progress;
+                    @endphp
+                    @if($isTunggakan)
+                        <span style="color: #dc3545; font-weight: bold;">-{{ str_replace('.', ',', $progressValue) }}% (Tunggakan dari kelas lama)</span>
+                    @else
+                        {{ round($progress) }}%
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -161,7 +185,7 @@
                                 @foreach($t->pembayaran as $i => $p)
                                 <tr>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px;">Angsuran {{ $i+1 }}</td>
-                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y') }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d M Y H:i') }}</td>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ $p->metode_pembayaran ?? '-' }}</td>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px; text-align: right;">{{ $rupiah($p->nominal) }}</td>
                                 </tr>
@@ -219,7 +243,7 @@
                                 @foreach($t->pembayaran as $i => $p)
                                 <tr>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px;">Angsuran {{ $i+1 }}</td>
-                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y') }}</td>
+                                    <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ \Carbon\Carbon::parse($p->tanggal)->format('d M Y H:i') }}</td>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px;">{{ $p->metode_pembayaran ?? '-' }}</td>
                                     <td style="border: none; padding: 3px 8px; font-size: 10px; text-align: right;">{{ $rupiah($p->nominal) }}</td>
                                 </tr>
@@ -242,8 +266,18 @@
         </tbody>
     </table>
 
+    <div class="signature-section">
+        <div class="sig-label">Mengetahui,</div>
+        <div class="sig-label-head">Kepala Sekolah</div>
+        @if(!empty($signatureBase64))
+            <img src="{{ $signatureBase64 }}" alt="tandatangan" style="border:none;">
+        @endif
+        <div class="divider"></div>
+        <div class="sig-name">Dwi Feni Indarti, S.E</div>
+    </div>
+
     <div class="footer">
-        <div>Dicetak: {{ now()->format('d-m-Y H:i') }}</div>
+        <div>Dicetak: {{ now()->format('d M Y H:i') }}</div>
         <div>Hal. <span class="pagenum"></span> / <span class="pagecount"></span></div>
     </div>
 </div>

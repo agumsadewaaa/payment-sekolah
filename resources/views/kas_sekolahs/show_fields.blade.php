@@ -2,7 +2,7 @@
     <div class="col-12">
         <div class="p-3 bg-light rounded">
             <label class="text-muted small mb-1"><i class="fas fa-calendar me-2"></i>Tanggal</label>
-            <h5 class="mb-0">{{ \Carbon\Carbon::parse($kasSekolah->tanggal)->format('d F Y') }}</h5>
+            <h5 class="mb-0">{{ \Carbon\Carbon::parse($kasSekolah->tanggal)->format('d F Y, H:i:s') }}</h5>
         </div>
     </div>
 

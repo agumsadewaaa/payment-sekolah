@@ -8,6 +8,8 @@ use App\Http\Controllers\AppBaseController;
 use App\Repositories\SiswaRepository;
 use App\Models\Siswa;
 use App\Models\Tagihan;
+use App\Models\Kelas;
+use App\Models\KasSiswa;
 use Illuminate\Http\Request;
 use Flash;
 
@@ -138,24 +140,78 @@ class SiswaController extends AppBaseController
 
     public function getTagihanBySiswa($siswa_id)
     {
-        $siswa = Siswa::findOrFail($siswa_id);
+        try {
+            $siswa = Siswa::findOrFail($siswa_id);
 
-        // Ambil tagihan yang belum lunas untuk siswa ini
-        // Filter berdasarkan kelas (jurusan) siswa saat ini
-        $tagihanBelumLunas = Tagihan::where('kelas', $siswa->jurusan)
-            ->get()
-            ->filter(function ($tagihan) use ($siswa_id) {
-                // Hitung total pembayaran untuk tagihan ini
-                $totalBayar = $tagihan->kasSiswa()
-                    ->where('siswa_id', $siswa_id)
-                    ->sum('nominal');
+            // Pre-load all payments for this student (one query instead of N)
+            $allTagihanIdsForSiswa = Tagihan::where('kelas', $siswa->jurusan)->pluck('id');
 
-                // Tampilkan jika belum lunas
-                return $totalBayar < $tagihan->nominal;
-            })
-            ->pluck('tagihan', 'id');
+            $previousClasses = collect();
+            if ($siswa->jurusans) {
+                $previousClasses = Kelas::where('jurusan', $siswa->jurusans->jurusan)
+                    ->where('kelas', '<', $siswa->jurusans->kelas)
+                    ->pluck('id');
+                if ($previousClasses->count() > 0) {
+                    $previousTagihanIds = Tagihan::whereIn('kelas', $previousClasses)->pluck('id');
+                    $allTagihanIdsForSiswa = $allTagihanIdsForSiswa->merge($previousTagihanIds)->unique();
+                }
+            }
 
-        return response()->json($tagihanBelumLunas);
+            $pembayaranPerTagihan = KasSiswa::where('siswa_id', $siswa_id)
+                ->whereIn('tagihan_id', $allTagihanIdsForSiswa)
+                ->groupBy('tagihan_id')
+                ->selectRaw('tagihan_id, SUM(nominal) as total')
+                ->pluck('total', 'tagihan_id');
+
+            // 1) Tagihan kelas saat ini yang belum lunas
+            $tagihanKelasSaatIni = Tagihan::where('kelas', $siswa->jurusan)
+                ->get()
+                ->filter(function ($tagihan) use ($pembayaranPerTagihan) {
+                    $totalBayar = (int)($pembayaranPerTagihan[$tagihan->id] ?? 0);
+                    return $totalBayar < $tagihan->nominal;
+                })
+                ->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'label' => $t->tagihan
+                    ];
+                });
+
+            // 2) Tagihan kelas lama (carry-over)
+            $tagihanKelasLama = collect();
+            if ($previousClasses->count() > 0) {
+                $tagihanKelasLama = Tagihan::whereIn('kelas', $previousClasses)
+                    ->get()
+                    ->filter(function ($tagihan) use ($pembayaranPerTagihan, $siswa) {
+                        $totalBayar = (int)($pembayaranPerTagihan[$tagihan->id] ?? 0);
+                        if ($siswa->kelas == 0) {
+                            $status = $totalBayar < $tagihan->nominal;
+                        } else {
+                            $status = $totalBayar > 0 && $totalBayar < $tagihan->nominal;
+                        }
+                        return $status;
+                    })
+                    ->map(function ($t) {
+                        return [
+                            'id' => $t->id,
+                            'label' => $t->tagihan . ' [TUNGGAKAN]'
+                        ];
+                    });
+            }
+
+            // Combine semua tagihan
+            $allTagihans = $tagihanKelasSaatIni->merge($tagihanKelasLama);
+            
+            // Convert ke format untuk dropdown
+            $result = [];
+            foreach ($allTagihans as $tagihan) {
+                $result[$tagihan['id']] = $tagihan['label'];
+            }
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function getSisaTagihan($siswa_id, $tagihan_id)
@@ -172,6 +228,69 @@ class SiswaController extends AppBaseController
             'sisa' => $sisa > 0 ? $sisa : 0,
             'nominal_tagihan' => $tagihan->nominal,
             'total_bayar' => $totalBayar
+        ]);
+    }
+
+    public function getTagihanInfo($siswa_id, $kelas_id, $tagihan_id)
+    {
+        $siswa = Siswa::findOrFail($siswa_id);
+        $kelas = Kelas::findOrFail($kelas_id);
+        $tagihan = Tagihan::findOrFail($tagihan_id);
+        
+        // Format: nama siswa - kode kelas - nama tagihan
+        $catatan = $siswa->nama . ' - Kelas ' . $kelas->kode . ' - ' . $tagihan->tagihan;
+
+        return response()->json([
+            'catatan' => $catatan
+        ]);
+    }
+    
+    // NEW: Get outstanding bills information for a student
+    public function getOutstandingBills($siswa_id)
+    {
+        $siswa = Siswa::findOrFail($siswa_id);
+        
+        $outstandingBills = [];
+        $totalOutstanding = 0;
+        
+        // Check for previous classes with unpaid bills
+        if ((int)$siswa->jurusans?->kelas >= 11) {
+            $previousClasses = Kelas::where('jurusan', $siswa->jurusans?->jurusan)
+                ->where('kelas', '<', $siswa->jurusans?->kelas)
+                ->pluck('id');
+            
+            if ($previousClasses->count() > 0) {
+                $previousTagihans = Tagihan::whereIn('kelas', $previousClasses)->get();
+                
+                // Pre-load all payments for this student (one query instead of N)
+                $previousTagihanIds = $previousTagihans->pluck('id');
+                $pembayaranPerTagihan = KasSiswa::where('siswa_id', $siswa_id)
+                    ->whereIn('tagihan_id', $previousTagihanIds)
+                    ->groupBy('tagihan_id')
+                    ->selectRaw('tagihan_id, SUM(nominal) as total')
+                    ->pluck('total', 'tagihan_id');
+                
+                foreach ($previousTagihans as $prevTagihan) {
+                    $totalBayar = (int)($pembayaranPerTagihan[$prevTagihan->id] ?? 0);
+                    
+                    $sisa = max(0, $prevTagihan->nominal - $totalBayar);
+                    
+                    if ($sisa > 0) {
+                        $outstandingBills[] = [
+                            'tagihan' => $prevTagihan->tagihan,
+                            'nominal' => $sisa,
+                            'kode_kelas' => $prevTagihan->kelass?->kode ?? 'Unknown'
+                        ];
+                        $totalOutstanding += $sisa;
+                    }
+                }
+            }
+        }
+        
+        return response()->json([
+            'has_outstanding' => count($outstandingBills) > 0,
+            'outstanding_bills' => $outstandingBills,
+            'total_outstanding' => $totalOutstanding
         ]);
     }
 }

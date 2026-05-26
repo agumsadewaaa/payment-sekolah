@@ -28,15 +28,16 @@ class CheckRole
 
         // If the Spatie trait is available prefer the hasAnyRole helper (can evaluate array)
         if (method_exists($user, 'hasAnyRole')) {
-            if ($user->hasAnyRole($allowed)) {
-                return $next($request);
+            if (!$user->hasAnyRole($allowed)) {
+                abort(403, 'Forbidden — you do not have the required role.');
             }
-        } else {
-            // fallback to older single-string role column checks
-            foreach ($allowed as $role) {
-                if (method_exists($user, 'hasRole') ? $user->hasRole($role) : ($user->role === $role)) {
-                    return $next($request);
-                }
+            return $next($request);
+        }
+
+        // fallback to older single-string role column checks
+        foreach ($allowed as $role) {
+            if (method_exists($user, 'hasRole') ? $user->hasRole($role) : ($user->role === $role)) {
+                return $next($request);
             }
         }
 

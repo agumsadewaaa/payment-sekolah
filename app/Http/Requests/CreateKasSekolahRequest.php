@@ -24,6 +24,14 @@ class CreateKasSekolahRequest extends FormRequest
      */
     public function rules()
     {
-        return KasSekolah::$rules;
+        $rules = KasSekolah::$rules;
+        
+        // Untuk tipe 2 (Pengeluaran), catatan harus required
+        // Untuk tipe 1 (Pendapatan), catatan optional (akan auto-generated)
+        if ($this->input('tipe') == 2) {
+            $rules['catatan'] = 'required|string|max:500';
+        }
+        
+        return $rules;
     }
 }

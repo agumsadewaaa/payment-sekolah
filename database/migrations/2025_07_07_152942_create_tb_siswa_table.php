@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tb_siswa', function (Blueprint $table) {
             $table->id(); // BIGINT UNSIGNED AUTO_INCREMENT
             $table->string('nama');
-            $table->string('nisn'); // Changed from bigInteger to string to preserve leading zeros
+            $table->bigInteger('nisn'); // Initially as bigInteger, will be changed to string later
             $table->string('kontak_ortu')->nullable();
             $table->integer('kelas'); // values: 10, 11, 12
             $table->string('jurusan');

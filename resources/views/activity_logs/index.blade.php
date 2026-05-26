@@ -23,7 +23,7 @@
             <form method="GET" action="{{ route('activity-logs.index') }}" class="mb-3">
                 <div class="row g-2 align-items-center">
                     <div class="col-auto filter-user">
-                        <select class="selectpicker" id="user_id" name="user_id" data-width="300px">
+                        <select class="selectpicker" id="user_id" name="user_id" data-width="300px" data-live-search="true" data-style="btn-light">
                             <option value="">👤 Semua User</option>
                             @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
@@ -33,7 +33,7 @@
                         </select>
                     </div>
                     <div class="col-auto filter-action">
-                        <select class="selectpicker" id="action" name="action" data-width="300px">
+                        <select class="selectpicker" id="action" name="action" data-width="300px" data-live-search="true" data-style="btn-light">
                             <option value="">⚡ Semua Aksi</option>
                             <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Created</option>
                             <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Updated</option>
@@ -165,15 +165,4 @@
 </style>
 @endpush
 
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        // Initialize selectpicker
-        $('.selectpicker').selectpicker({
-            style: 'btn-light',
-            width: '300px'
-        });
-    });
-</script>
-@endpush
 @endsection

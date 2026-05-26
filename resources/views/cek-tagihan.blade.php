@@ -22,10 +22,10 @@
         <div class="card-body p-4">
             <form action="{{ route('cek-tagihan') }}" method="GET" class="row g-3">
                 <div class="col-md-8">
-                    <label class="form-label">Nama atau NISN</label>
+                    <label class="form-label">Nama atau NIS</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input type="text" name="keyword" class="form-control" placeholder="Masukkan Nama atau NISN" value="{{ request('keyword') }}" required>
+                        <input type="text" name="keyword" class="form-control" placeholder="Masukkan Nama atau NIS" value="{{ request('keyword') }}" required>
                     </div>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
@@ -56,15 +56,15 @@
                         <div class="d-flex align-items-center mb-3">
                             <i class="fas fa-id-card text-primary me-3" style="font-size: 20px;"></i>
                             <div>
-                                <small class="text-muted d-block">NISN</small>
-                                <strong style="font-family: monospace;">{{ $siswa->nisn }}</strong>
+                                <small class="text-muted d-block">NIS</small>
+                                <strong style="font-family: monospace;">{{ $siswa->nis }}</strong>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
                             <i class="fas fa-school text-primary me-3" style="font-size: 20px;"></i>
                             <div>
                                 <small class="text-muted d-block">Kelas</small>
-                                <strong>{{ $siswa->kelas }}</strong>
+                                <strong>{{ $siswa->kelas == 0 ? 'Lulus' : $siswa->kelas }}</strong>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -79,20 +79,32 @@
                         <div class="card bg-light border-0 h-100">
                             <div class="card-body">
                                 <h6 class="text-muted mb-3">Progress Pembayaran</h6>
-                                <div class="progress mb-2" style="height: 30px;">
-                                    <div class="progress-bar {{ $progress >= 75 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-danger') }}" 
-                                         role="progressbar" 
-                                         style="width: {{ $progress }}%" 
-                                         aria-valuenow="{{ $progress }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                        <strong>{{ round($progress) }}%</strong>
+                                @php
+                                    $isTunggakan = is_string($progress) && strpos((string)$progress, '-') === 0;
+                                    $progressValue = $isTunggakan ? ltrim($progress, '-') : $progress;
+                                @endphp
+                                @if($isTunggakan)
+                                    <div class="alert alert-danger mb-0" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Tunggakan {{ str_replace('.', ',', $progressValue) }}%</strong>
+                                        <p class="mb-0 mt-2">Anda memiliki tunggakan tagihan dari kelas sebelumnya sebesar {{ str_replace('.', ',', $progressValue) }}% yang belum lunas. Harap lunasi semua tagihan sebelum melanjutkan pembayaran kelas baru.</p>
                                     </div>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-success"><strong>Terbayar: Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></span>
-                                    <span class="text-danger"><strong>Total: Rp {{ number_format($totalTagihan, 0, ',', '.') }}</strong></span>
-                                </div>
+                                @else
+                                    <div class="progress mb-2" style="height: 30px;">
+                                        <div class="progress-bar {{ $progress >= 75 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-danger') }}" 
+                                             role="progressbar" 
+                                             style="width: {{ $progress }}%" 
+                                             aria-valuenow="{{ $progress }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            <strong>{{ round($progress) }}%</strong>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-success"><strong>Terbayar: Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></span>
+                                        <span class="text-danger"><strong>Total: Rp {{ number_format($totalTagihan, 0, ',', '.') }}</strong></span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -200,7 +212,7 @@
                                             @forelse($tagihan['pembayaran'] as $i => $p)
                                                 <tr>
                                                     <td>Angsuran {{ $i+1 }}</td>
-                                                    <td>{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y') }}</td>
+                                                    <td>{{ \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y H:i:s') }}</td>
                                                     <td>{{ $p->metode_pembayaran ?? '-' }}</td>
                                                     <td>Rp {{ number_format($p->nominal, 0, ',', '.') }}</td>
                                                 </tr>

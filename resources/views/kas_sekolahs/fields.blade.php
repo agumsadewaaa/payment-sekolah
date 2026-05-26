@@ -27,10 +27,11 @@
 <div class="form-group col-sm-6">
     {!! Form::label('tipe', 'Tipe:') !!}<span class="text-danger">*</span>
     {!! Form::select('tipe', [1 => 'Pendapatan', 2 => 'Pengeluaran'], null, [
-        'class' => 'form-control',
+        'class' => 'form-control selectpicker',
         'id' => 'tipe',
         'placeholder' => 'Pilih tipe',
-        'required'
+        'required',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 
@@ -40,21 +41,34 @@
         <!-- Kelas -->
         <div class="form-group col-sm-6">
             {!! Form::label('kelas', 'Kelas:') !!}<span class="text-danger">*</span>
-            {!! Form::select('kelas', $kelas, null, [
-                'class' => 'form-control pendapatan-field',
+            {!! Form::select('kelas', $kelas, old('kelas', isset($kasSiswa) && $kasSiswa && $kasSiswa->siswa ? $kasSiswa->siswa->jurusan : null), [
+                'class' => 'form-control pendapatan-field selectpicker',
                 'id' => 'kelas',
-                'placeholder' => 'Pilih kelas'
+                'placeholder' => 'Pilih kelas',
+                'data-live-search' => 'true'
             ]) !!}
         </div>
 
         <!-- Nama Siswa -->
         <div class="form-group col-sm-6">
             {!! Form::label('siswa_id', 'Nama:') !!}<span class="text-danger">*</span>
-            {!! Form::select('siswa_id', [], null, [
-                'class' => 'form-control pendapatan-field',
+            {!! Form::select('siswa_id', isset($siswaOptions) ? $siswaOptions : [], old('siswa_id', isset($kasSiswa) ? $kasSiswa->siswa_id : null), [
+                'class' => 'form-control pendapatan-field selectpicker',
                 'id' => 'siswa_id',
-                'placeholder' => 'Pilih nama siswa'
+                'placeholder' => 'Pilih nama siswa',
+                'data-live-search' => 'true'
             ]) !!}
+        </div>
+    </div>
+    
+    <!-- Alert for Outstanding Bills -->
+    <div id="alert-outstanding" style="display:none;" class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-triangle"></i> Perhatian!</strong>
+                <p id="alert-text" class="mb-0"></p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         </div>
     </div>
     
@@ -62,24 +76,28 @@
         <!-- Tagihan -->
         <div class="form-group col-sm-6">
             {!! Form::label('tagihan_id', 'Tagihan:') !!}<span class="text-danger">*</span>
-            {!! Form::select('tagihan_id', [], null, [
-                'class' => 'form-control pendapatan-field',
-                'id' => 'tagihan_id',
-                'placeholder' => 'Pilih tagihan'
-            ]) !!}
+            {!! Form::select('tagihan_id', 
+                isset($tagihanOptions) ? $tagihanOptions : [],
+                old('tagihan_id', isset($kasSiswa) ? $kasSiswa->tagihan_id : null), 
+                [
+                    'class' => 'form-control pendapatan-field selectpicker',
+                    'id' => 'tagihan_id',
+                    'placeholder' => 'Pilih tagihan',
+                    'data-live-search' => 'true'
+                ]) !!}
         </div>
 
         <!-- Metode Pembayaran -->
         <div class="form-group col-sm-6">
             {!! Form::label('metode_pembayaran', 'Metode Pembayaran:') !!}<span class="text-danger">*</span>
             {!! Form::select('metode_pembayaran', ['Tunai' => 'Tunai', 'Transfer' => 'Transfer', 'Non-Tunai' => 'Non-Tunai / Beasiswa'], null, [
-                'class' => 'form-control pendapatan-field',
+                'class' => 'form-control pendapatan-field selectpicker',
                 'id' => 'metode_pembayaran',
-                'placeholder' => 'Pilih metode pembayaran'
+                'placeholder' => 'Pilih metode pembayaran',
+                'data-live-search' => 'true'
             ]) !!}
         </div>
     </div>
-</div>
 
 <!-- ====== Form Pengeluaran ====== -->
 <div id="form-pengeluaran" style="display:none;">
@@ -146,6 +164,7 @@ $(function() {
             pendapatanFields.forEach(f => f.required = false);
             pengeluaranFields.forEach(f => f.required = false);
         }
+        $('.selectpicker').selectpicker('refresh');
     }
 
     tipeSelect.addEventListener('change', toggleForm);
@@ -154,6 +173,26 @@ $(function() {
     // Auto-trigger jika ada old input (setelah error/validation fail)
     @if(old('kelas'))
         $('#kelas').val('{{ old('kelas') }}').trigger('change');
+        $('#kelas').selectpicker('refresh');
+    @elseif(isset($kasSiswa) && $kasSiswa)
+        $('#kelas').val('{{ $kasSiswa && $kasSiswa->siswa ? $kasSiswa->siswa->jurusan : old('kelas') }}').trigger('change');
+        $('#kelas').selectpicker('refresh');
+    @endif
+
+    // Jika edit dan ada siswa, trigger siswa change
+    @if(isset($kasSiswa) && $kasSiswa)
+        setTimeout(function() {
+            $('#siswa_id').val('{{ $kasSiswa->siswa_id }}').trigger('change');
+            $('#siswa_id').selectpicker('refresh');
+        }, 500);
+    @endif
+
+    // Jika edit dan ada tagihan, trigger tagihan change
+    @if(isset($kasSiswa) && $kasSiswa)
+        setTimeout(function() {
+            $('#tagihan_id').val('{{ $kasSiswa->tagihan_id }}').trigger('change');
+            $('#tagihan_id').selectpicker('refresh');
+        }, 1000);
     @endif
 
     // formatting for nominal inputs is handled via shared partial
@@ -184,44 +223,97 @@ $(document).ready(function() {
     // Siswa -> tagihan
     $('#siswa_id').on('change', function() {
         var siswa_id = $(this).val();
-        $('#tagihan_id').empty().append('<option value="">Loading...</option>');
+        
+        // Check for outstanding bills
         if(siswa_id) {
-            $.get('/get-tagihan-by-siswa/' + siswa_id, function(data) {
-                $('#tagihan_id').empty().append('<option value="">Pilih tagihan</option>');
-                $.each(data, function(id, tagihan) {
-                    $('#tagihan_id').append('<option value="'+id+'">'+tagihan+'</option>');
-                });
-                if(typeof $.fn.selectpicker !== 'undefined') {
-                    $('#tagihan_id').selectpicker('refresh');
+            $.get('/get-outstanding-bills/' + siswa_id, function(response) {
+                if(response && response.has_outstanding) {
+                    var billsList = response.outstanding_bills.map(function(bill) {
+                        return bill.kode_kelas + ' - ' + bill.tagihan + ': Rp ' + bill.nominal.toLocaleString('id-ID');
+                    }).join('<br>');
+                    
+                    $('#alert-text').html(
+                        'Siswa ini memiliki tunggakan dari kelas sebelumnya sebagai berikut:<br>' +
+                        billsList + '<br><br>' +
+                        '<strong>Total Tunggakan: Rp ' + response.total_outstanding.toLocaleString('id-ID') + '</strong><br>' +
+                        'Pastikan pembayaran kali ini cukup untuk melunasi tunggakan PLUS tagihan kelas saat ini!'
+                    );
+                    $('#alert-outstanding').show();
+                } else {
+                    $('#alert-outstanding').hide();
                 }
+            }).fail(function(error) {
+                console.log('Error getting outstanding bills:', error);
+                $('#alert-outstanding').hide();
             });
         }
+        
+        @if(isset($kasSekolah))
+            // EDIT MODE: Jangan refresh tagihan via AJAX, sudah di-populate dari PHP
+            // Hanya trigger tagihan change untuk auto-populate catatan
+            $('#tagihan_id').trigger('change');
+        @else
+            // CREATE MODE: Populate tagihan via AJAX
+            $('#tagihan_id').empty().append('<option value="">Loading...</option>');
+            if(siswa_id) {
+                $.get('/get-tagihan-by-siswa/' + siswa_id, function(data) {
+                    console.log('Tagihan data received:', data);
+                    $('#tagihan_id').empty().append('<option value="">Pilih tagihan</option>');
+                    if(data && Object.keys(data).length > 0) {
+                        $.each(data, function(id, tagihan) {
+                            $('#tagihan_id').append('<option value="'+id+'">'+tagihan+'</option>');
+                        });
+                    } else {
+                        console.log('No tagihan available for siswa:', siswa_id);
+                        $('#tagihan_id').append('<option value="">Tidak ada tagihan yang tersedia</option>');
+                    }
+                    if(typeof $.fn.selectpicker !== 'undefined') {
+                        $('#tagihan_id').selectpicker('refresh');
+                    }
+                }).fail(function(error) {
+                    console.log('Error getting tagihan:', error);
+                    $('#tagihan_id').empty().append('<option value="">Error loading tagihan</option>');
+                });
+            }
+        @endif
     });
 
-    // Tagihan -> validasi nominal max
+    // Tagihan -> validasi nominal max dan auto-populate catatan
     $('#tagihan_id').on('change', function() {
         var tagihan_id = $(this).val();
         var siswa_id = $('#siswa_id').val();
+        var kelas_id = $('#kelas').val();
         
         if(tagihan_id && siswa_id) {
-            // Get sisa tagihan via AJAX
-            $.get('/get-sisa-tagihan/' + siswa_id + '/' + tagihan_id, function(response) {
-                if(response.sisa !== undefined) {
-                    var sisaTagihan = response.sisa;
-                    var nominalInput = $('#nominal');
-                    
-                    // Set max attribute
-                    nominalInput.attr('max', sisaTagihan);
-                    nominalInput.attr('placeholder', 'Maksimal: Rp ' + sisaTagihan.toLocaleString('id-ID'));
-                    
-                    // Tambahkan info sisa
-                    if($('#info-sisa').length === 0) {
-                        nominalInput.closest('.form-group').append(
-                            '<small id="info-sisa" class="text-info">Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID') + '</small>'
-                        );
-                    } else {
-                        $('#info-sisa').text('Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID'));
+            @if(!isset($kasSekolah))
+                // UNTUK CREATE: Get sisa tagihan via AJAX
+                $.get('/get-sisa-tagihan/' + siswa_id + '/' + tagihan_id, function(response) {
+                    if(response.sisa !== undefined) {
+                        var sisaTagihan = response.sisa;
+                        var nominalInput = $('#nominal');
+                        
+                        // Set max attribute hanya untuk create
+                        nominalInput.attr('max', sisaTagihan);
+                        nominalInput.attr('placeholder', 'Maksimal: Rp ' + sisaTagihan.toLocaleString('id-ID'));
+                        
+                        // Tambahkan info sisa
+                        if($('#info-sisa').length === 0) {
+                            nominalInput.closest('.form-group').append(
+                                '<small id="info-sisa" class="text-info">Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID') + '</small>'
+                            );
+                        } else {
+                            $('#info-sisa').text('Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID'));
+                        }
                     }
+                });
+            @else
+                // UNTUK EDIT: Hanya auto-populate catatan tanpa validasi nominal
+            @endif
+            
+            // Get tagihan info untuk auto-populate catatan (untuk create dan edit)
+            $.get('/get-tagihan-info/' + siswa_id + '/' + kelas_id + '/' + tagihan_id, function(response) {
+                if(response.catatan) {
+                    $('#catatan').val(response.catatan);
                 }
             });
         }

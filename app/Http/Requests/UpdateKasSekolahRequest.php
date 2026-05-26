@@ -26,6 +26,12 @@ class UpdateKasSekolahRequest extends FormRequest
     {
         $rules = KasSekolah::$rules;
         
+        // Untuk tipe 2 (Pengeluaran), catatan harus required
+        // Untuk tipe 1 (Pendapatan), catatan optional (akan auto-generated atau sudah ada)
+        if ($this->input('tipe') == 2) {
+            $rules['catatan'] = 'required|string|max:500';
+        }
+        
         return $rules;
     }
 }

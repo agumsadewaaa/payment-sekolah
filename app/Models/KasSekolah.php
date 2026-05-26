@@ -21,7 +21,7 @@ class KasSekolah extends Model
 
     protected $casts = [
         'id' => 'integer',
-        'tanggal' => 'date',
+        'tanggal' => 'datetime',
         'catatan' => 'string',
         'tipe' => 'integer',
         'metode_pembayaran' => 'string',
@@ -29,12 +29,23 @@ class KasSekolah extends Model
     ];
 
     public static array $rules = [
-        
+        'tanggal' => 'required|date',
+        'catatan' => 'nullable|string|max:500',
+        'tipe' => 'required|integer|in:1,2',
+        'metode_pembayaran' => 'nullable|string|max:50',
+        'nominal' => 'required|integer|min:1'
     ];
 
     public function kasSiswas()
     {
         return $this->hasMany(KasSiswa::class, 'kas_sekolah_id', 'id');
+    }
+
+    public function scopeNonImport($query)
+    {
+        return $query->where(function($q) {
+            $q->whereNull('metode_pembayaran')->orWhere('metode_pembayaran', '!=', 'Import Excel');
+        });
     }
 
     // Event agar anak ikut soft delete

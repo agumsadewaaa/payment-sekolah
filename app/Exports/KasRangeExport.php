@@ -19,6 +19,7 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
 {
     protected string $from;
     protected string $to;
+    protected Carbon $exportedAt;
 
     protected int $saldoSebelumnya = 0;
     protected int $totalPendapatan = 0;
@@ -29,6 +30,7 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
     {
         $this->from = $from;
         $this->to   = $to;
+        $this->exportedAt = Carbon::now();
     }
 
     public function collection()
@@ -36,13 +38,13 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
         $fromDate = Carbon::parse($this->from)->startOfDay();
         $toDate   = Carbon::parse($this->to)->endOfDay();
 
-        // Saldo sebelumnya
-        $this->saldoSebelumnya = (int)(KasSekolah::where('tanggal', '<', $fromDate)
+        // Saldo sebelumnya (exclude import excel)
+        $this->saldoSebelumnya = (int)(KasSekolah::nonImport()->where('tanggal', '<', $fromDate)
             ->selectRaw("SUM(CASE WHEN tipe='1' THEN nominal WHEN tipe='2' THEN -nominal ELSE 0 END) as saldo")
             ->value('saldo') ?? 0);
 
-        // Data periode
-        $rows = KasSekolah::whereBetween('tanggal', [$fromDate, $toDate])
+        // Data periode (exclude import excel)
+        $rows = KasSekolah::nonImport()->whereBetween('tanggal', [$fromDate, $toDate])
             ->orderBy('tanggal','asc')
             ->get(['tanggal','catatan','tipe','nominal']);
 
@@ -55,7 +57,7 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
 
         // Baris saldo sebelumnya (sebagai opening balance)
         $data->push([
-            Carbon::parse($fromDate)->subDay()->format('d-m-Y'),
+            Carbon::parse($fromDate)->subDay(),
             'Saldo sebelumnya',
             null,
             null,
@@ -70,7 +72,7 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
             $running += ($pendapatan ?? 0) - ($pengeluaran ?? 0);
 
             $data->push([
-                Carbon::parse($r->tanggal)->format('d-m-Y'),
+                $r->tanggal,
                 $r->catatan,
                 $pendapatan,
                 $pengeluaran,
@@ -92,6 +94,8 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
     {
         $periode = Carbon::parse($this->from)->format('d-M-Y')
             .' s.d. '.Carbon::parse($this->to)->format('d-M-Y');
+        
+        $exportedAtFormatted = $this->exportedAt->format('d M Y H:i');
 
         // Generate judul dinamis berdasarkan bulan periode
         $fromCarbon = Carbon::parse($this->from);
@@ -136,34 +140,36 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
         return [
             ["KAS SMK YPE SAMPANG BLN $judulPeriode"],
             [$periode],
+            ["Export: $exportedAtFormatted"],
             ['Tanggal','Catatan','Pendapatan','Pengeluaran','Saldo'],
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        // Judul + periode
+        // Judul + periode + export time
         $sheet->mergeCells('A1:E1');
         $sheet->mergeCells('A2:E2');
+        $sheet->mergeCells('A3:E3');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal('center');
 
-        // Header kolom
-        $sheet->getStyle('A3:E3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:E3')->getAlignment()->setHorizontal('center');
-        $sheet->getStyle('A3:E3')->getFill()
+        // Header kolom (row 4)
+        $sheet->getStyle('A4:E4')->getFont()->setBold(true);
+        $sheet->getStyle('A4:E4')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('A4:E4')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('D9D9D9');
 
         // Border seluruh tabel
         $highestRow = $sheet->getHighestRow();
-        $sheet->getStyle("A3:E{$highestRow}")
+        $sheet->getStyle("A4:E{$highestRow}")
             ->getBorders()->getAllBorders()
             ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
         // Perataan
-        $sheet->getStyle("C4:E{$highestRow}")->getAlignment()->setHorizontal('right');
-        $sheet->getStyle("A4:B{$highestRow}")->getAlignment()->setHorizontal('left');
+        $sheet->getStyle("C5:E{$highestRow}")->getAlignment()->setHorizontal('right');
+        $sheet->getStyle("A5:B{$highestRow}")->getAlignment()->setHorizontal('left');
 
         // Lebar kolom catatan
         $sheet->getColumnDimension('B')->setWidth(48);
@@ -171,7 +177,7 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
         // Warna isi baris transaksi (bukan footer):
         //   - C (Pendapatan) hijau, D (Pengeluaran) merah
         //   Footer akan dioverride di bawah.
-        for ($row = 4; $row <= $highestRow; $row++) {
+        for ($row = 5; $row <= $highestRow; $row++) {
             $valPend = $sheet->getCell("C{$row}")->getValue();
             $valPeng = $sheet->getCell("D{$row}")->getValue();
 
@@ -215,11 +221,11 @@ class KasRangeExport implements FromCollection, WithHeadings, WithStyles, WithEv
                 $sheet = $event->sheet->getDelegate();
                 $highestRow = $sheet->getHighestRow();
 
-                // Freeze header
-                $sheet->freezePane('A4');
+                // Freeze header (row 4 is headers, so freeze after row 4)
+                $sheet->freezePane('A5');
 
                 // Format tanggal
-                $sheet->getStyle("A4:A{$highestRow}")
+                $sheet->getStyle("A5:A{$highestRow}")
                       ->getNumberFormat()->setFormatCode('dd-mm-yyyy');
             },
         ];

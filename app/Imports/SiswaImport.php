@@ -32,9 +32,9 @@ class SiswaImport implements ToCollection, WithHeadingRow
         \Log::info("Tagihan Map: " . json_encode($tagihanMap));
         
         foreach ($rows as $index => $row) {
-            // Stop jika ketemu baris kosong (nama dan nisn kosong)
+            // Stop jika ketemu baris kosong (nama dan nis kosong)
             if ((empty($row['nama']) || trim($row['nama']) === '') && 
-                (empty($row['nisn']) || trim($row['nisn']) === '')) {
+                (empty($row['nis']) || trim($row['nis']) === '')) {
                 break; // Stop processing completely
             }
 
@@ -42,8 +42,8 @@ class SiswaImport implements ToCollection, WithHeadingRow
             if (empty($row['nama']) || trim($row['nama']) === '') {
                 throw new \Exception("Baris " . ($index + 2) . ": Nama wajib diisi");
             }
-            if (empty($row['nisn']) || trim($row['nisn']) === '') {
-                throw new \Exception("Baris " . ($index + 2) . ": NISN wajib diisi");
+            if (empty($row['nis']) || trim($row['nis']) === '') {
+                throw new \Exception("Baris " . ($index + 2) . ": NIS wajib diisi");
             }
             if (empty($row['kelas'])) {
                 throw new \Exception("Baris " . ($index + 2) . ": Kelas wajib diisi");
@@ -52,16 +52,16 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 throw new \Exception("Baris " . ($index + 2) . ": Jurusan wajib diisi");
             }
 
-            // NISN disimpan sebagai string untuk preserve leading zeros
+            // NIS disimpan sebagai string untuk preserve leading zeros
             // Excel format TEXT sudah menjaga angka 0 di depan
-            $nisn = trim((string) $row['nisn']);
+            $nis = trim((string) $row['nis']);
             
             // Kontak ortu juga simpan sebagai string
             $kontakOrtu = isset($row['kontak_ortu']) ? trim((string) $row['kontak_ortu']) : null;
 
-            // Cek NISN sudah ada atau belum
-            if (Siswa::where('nisn', $nisn)->exists()) {
-                throw new \Exception("Baris " . ($index + 2) . ": NISN {$nisn} sudah terdaftar di database");
+            // Cek NIS sudah ada atau belum
+            if (Siswa::where('nis', $nis)->exists()) {
+                throw new \Exception("Baris " . ($index + 2) . ": NIS {$nis} sudah terdaftar di database");
             }
 
             // Cari kelas berdasarkan kelas dan jurusan
@@ -76,13 +76,14 @@ class SiswaImport implements ToCollection, WithHeadingRow
             // Insert data siswa
             $siswa = Siswa::create([
                 'nama' => trim($row['nama']),
-                'nisn' => $nisn,
+                'nis' => $nis,
                 'kontak_ortu' => $kontakOrtu,
                 'kelas' => $row['kelas'],
                 'jurusan' => $kelas->id,
                 'tahun_masuk' => $row['tahun_masuk'] ?? date('Y'),
                 'tahun_lulus' => null,
                 'status_siswa' => 'Aktif',
+
             ]);
             
             // Proses pembayaran dari kolom Total Bayar
@@ -102,7 +103,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     ->toArray();
                 
                 // Ambil semua tagihan untuk kelas-kelas tersebut, urutkan dari kelas rendah ke tinggi
-                $tagihanList = Tagihan::whereIn('kelas', $kelasIds)
+                $tagihanList = Tagihan::with('kelass')->whereIn('kelas', $kelasIds)
                     ->orderBy('kelas')
                     ->get();
                 
@@ -123,9 +124,13 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     
                     if ($nominalBayar > 0) {
                         // Simpan ke kas_sekolah
+                        $kelasTagihan = $tagihan->kelass;
+                        $kelasLevel = $kelasTagihan ? $kelasTagihan->kelas : $siswa->kelas;
+                        $jurusanNama = $kelasTagihan ? $kelasTagihan->jurusan : $kelas->jurusan;
+
                         $kasSekolah = KasSekolah::create([
                             'tanggal' => $tanggalImport,
-                            'catatan' => 'Import Pembayaran: ' . $tagihan->tagihan . ' (Kelas ' . $siswa->kelas . ' ' . $kelas->jurusan . ') - ' . $siswa->nama,
+                            'catatan' => 'Import Pembayaran: ' . $tagihan->tagihan . ' (Kelas ' . $kelasLevel . ' ' . $jurusanNama . ') - ' . $siswa->nama,
                             'tipe' => 1, // 1 = Pemasukan
                             'metode_pembayaran' => 'Import Excel',
                             'nominal' => $nominalBayar,

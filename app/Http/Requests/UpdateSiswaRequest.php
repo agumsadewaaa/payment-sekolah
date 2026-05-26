@@ -26,6 +26,13 @@ class UpdateSiswaRequest extends FormRequest
     {
         $rules = Siswa::$rules;
         
+        // Modify NIS unique rule to exclude current siswa ID
+        // route('siswas.update', $id) -> $id is available in route parameter
+        $siswaId = $this->route('siswa');  // Get ID from route parameter
+        if ($siswaId) {
+            $rules['nis'] = 'required|string|max:20|unique:tb_siswa,nis,' . $siswaId;
+        }
+        
         return $rules;
     }
 }

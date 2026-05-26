@@ -9,10 +9,11 @@
 <div class="form-group col-sm-6">
     {!! Form::label('kelas', 'Tingkat Kelas:') !!}
     {!! Form::select('kelas', [10 => '10', 11 => '11', 12 => '12'], null, [
-        'class' => 'form-control',
+        'class' => 'form-control selectpicker',
         'placeholder' => 'Pilih tingkat kelas',
         'required',
-        'id' => 'kelas'
+        'id' => 'kelas',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 

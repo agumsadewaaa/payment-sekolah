@@ -4,10 +4,10 @@
     {!! Form::text('nama', null, ['class' => 'form-control', 'required' ]) !!}
 </div>
 
-<!-- NISN Field -->
+<!-- NIS Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('nisn', 'NISN:') !!}<span class="text-danger">*</span>
-    {!! Form::text('nisn', null, [
+    {!! Form::label('nis', 'NIS:') !!}<span class="text-danger">*</span>
+    {!! Form::text('nis', null, [
         'class' => 'form-control', 
         'required',
         'maxlength' => '20',
@@ -17,7 +17,7 @@
         'placeholder' => 'Contoh: 0051234567',
         'style' => 'font-family: monospace;'
     ]) !!}
-    <small class="form-text text-muted">NISN bisa dimulai dengan angka 0</small>
+    <small class="form-text text-muted">NIS bisa dimulai dengan angka 0</small>
 </div>
 
 <!-- Kontak Ortu Field -->
@@ -38,10 +38,11 @@
 <div class="form-group col-sm-6">
     {!! Form::label('kelas', 'Kelas:') !!}<span class="text-danger">*</span>
     {!! Form::select('kelas', [10 => '10', 11 => '11', 12 => '12'], null, [
-        'class' => 'form-control',
+        'class' => 'form-control selectpicker',
         'placeholder' => 'Pilih kelas',
         'required',
-        'id' => 'kelas'
+        'id' => 'kelas',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 
@@ -49,10 +50,11 @@
 <div class="form-group col-sm-6">
     {!! Form::label('jurusan', 'Jurusan:') !!}<span class="text-danger">*</span>
     {!! Form::select('jurusan', [], null, [
-        'class' => 'form-control',
+        'class' => 'form-control selectpicker',
         'placeholder' => 'Pilih jurusan',
         'required',
-        'id' => 'jurusan'
+        'id' => 'jurusan',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 
@@ -75,12 +77,13 @@
 <div class="form-group col-sm-6">
     {!! Form::label('status_siswa', 'Status Siswa:') !!}<span class="text-danger">*</span>
     {!! Form::select('status_siswa', [
-        'aktif' => 'Aktif',
-        'tidak aktif' => 'Tidak Aktif'
+        'Aktif' => 'Aktif',
+        'Tidak Aktif' => 'Tidak Aktif'
     ], null, [
-        'class' => 'form-control',
+        'class' => 'form-control selectpicker',
         'placeholder' => 'Pilih status',
-        'required'
+        'required',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 

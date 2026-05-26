@@ -145,7 +145,7 @@
                     <tbody>
                         @foreach($rows as $r)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($r->tanggal)->format('d-m-Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($r->tanggal)->format('d-m-Y H:i:s') }}</td>
                                 <td>{{ $r->catatan }}</td>
                                 <td>
                                     @if($r->tipe == '1')

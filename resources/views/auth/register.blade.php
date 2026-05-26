@@ -63,7 +63,7 @@
                         </div>
 
                         <div class="input-group mb-3">
-                            <select name="role" class="form-control @error('role') is-invalid @enderror">
+                            <select name="role" class="form-control selectpicker @error('role') is-invalid @enderror" data-live-search="true">
                                 <option value="user" selected>User</option>
                                 <option value="admin">Admin</option>
                             </select>

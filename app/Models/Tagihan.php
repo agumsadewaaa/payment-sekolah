@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Tagihan extends Model
 {
     protected $table = 'tb_tagihan_siswa';
+    public $timestamps = true;  // Ensure timestamps are managed
 
     protected $fillable = [
         'kelas',
@@ -21,7 +22,11 @@ class Tagihan extends Model
         'nominal' => 'integer'
     ];
 
-    public static array $rules = [];
+    public static array $rules = [
+        'kelas' => 'required|integer|exists:tb_kelas,id',
+        'tagihan' => 'required|string|max:255',
+        'nominal' => 'required|integer|min:1'
+    ];
 
     public function siswas()
     {

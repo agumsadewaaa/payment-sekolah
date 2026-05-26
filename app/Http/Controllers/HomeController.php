@@ -22,30 +22,24 @@ class HomeController extends Controller
         [$start, $end, $rangeLabel] = $this->resolveRange($range);
 
         // ===== 2) KARTU LAIN (tetap) =====
-        $totalSiswa = DB::table('tb_siswa')
-            ->whereNull('deleted_at')
-            ->count();
+        $totalSiswa = \App\Models\Siswa::count();
 
-        // Saldo total kas (all-time)
-        $totalKas = DB::table('tb_kas_sekolah')
-            ->select(DB::raw("
-                SUM(CASE WHEN tipe=1 THEN nominal
-                         WHEN tipe=2 THEN -nominal
-                         ELSE 0 END) AS saldo
-            "))->value('saldo');
+        // Saldo total kas (all-time), exclude import excel records
+        $totalKas = \App\Models\KasSekolah::nonImport()->selectRaw(
+            "SUM(CASE WHEN tipe=1 THEN nominal WHEN tipe=2 THEN -nominal ELSE 0 END) AS saldo"
+        )->value('saldo');
 
         // make sure we always have numeric value (if DB returned null)
         $totalKas = is_null($totalKas) ? 0 : $totalKas;
 
         // ===== 3) DATA BERDASARKAN RANGE (untuk kartu & grafik) =====
-        $kasPerHari = DB::table('tb_kas_sekolah')
-            ->select(
-                DB::raw("DATE(tanggal) as tgl"),
-                DB::raw("SUM(CASE WHEN tipe=1 THEN nominal ELSE 0 END) as pemasukan"),
-                DB::raw("SUM(CASE WHEN tipe=2 THEN nominal ELSE 0 END) as pengeluaran")
+        $kasPerHari = \App\Models\KasSekolah::nonImport()->selectRaw(
+                "DATE(tanggal) as tgl,
+                SUM(CASE WHEN tipe=1 THEN nominal ELSE 0 END) as pemasukan,
+                SUM(CASE WHEN tipe=2 THEN nominal ELSE 0 END) as pengeluaran"
             )
             ->whereBetween('tanggal', [$start->copy()->startOfDay(), $end->copy()->endOfDay()])
-            ->groupBy(DB::raw("DATE(tanggal)"))
+            ->groupByRaw("DATE(tanggal)")
             ->orderBy('tgl')
             ->get();
 
@@ -67,7 +61,8 @@ class HomeController extends Controller
 
         // ===== 4) Siswa progress < 50% =====
         // Ambil semua siswa dengan progress menggunakan attribute dari model
-        $allSiswa = \App\Models\Siswa::with('jurusans')->get();
+        // Eager load relationships untuk menghindari N+1 query
+        $allSiswa = \App\Models\Siswa::with(['jurusans', 'kasSiswas.tagihan'])->get();
         
         $siswaProgress = $allSiswa->filter(function($siswa) {
             return $siswa->progress < 50;
@@ -85,11 +80,10 @@ class HomeController extends Controller
         }
 
         // ===== 5) Latest pengeluaran (tetap) =====
-        $latestPengeluaran = DB::table('tb_kas_sekolah')
-            ->where('tipe',2)
-            ->orderBy('tanggal','desc')
+        $latestPengeluaran = \App\Models\KasSekolah::nonImport()->where('tipe', 2)
+            ->orderBy('tanggal', 'desc')
             ->limit(5)
-            ->get(['tanggal','catatan','nominal']);
+            ->get(['id', 'tanggal', 'catatan', 'nominal']);
 
         if ($latestPengeluaran->isEmpty()) {
             $latestPengeluaran = null;

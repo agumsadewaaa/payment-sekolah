@@ -17,7 +17,7 @@
 
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3">
-            <i class="fas fa-exclamation-circle me-2"></i>{!! session('error') !!}
+            <i class="fas fa-exclamation-circle me-2"></i>{!! nl2br(e(session('error'))) !!}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -65,7 +65,7 @@
                 <strong>Petunjuk:</strong>
                 <ol class="mb-0 mt-2">
                     <li>Download template Excel terlebih dahulu</li>
-                    <li>Isi data siswa: <strong>Nama, NISN, Kontak Ortu, Kelas, Jurusan, Tahun Masuk</strong></li>
+                    <li>Isi data siswa: <strong>Nama, NIS, Kontak Ortu, Kelas, Jurusan, Tahun Masuk</strong></li>
                     @if(isset($totalTagihan) && $totalTagihan > 0)
                     <li><strong>FITUR PEMBAYARAN:</strong> Isi kolom tagihan (hijau) untuk pembayaran yang sudah dibayar
                         <ul>
@@ -76,7 +76,7 @@
                     </li>
                     @endif
                     <li>Pastikan kombinasi <strong>Kelas dan Jurusan</strong> sudah ada di database</li>
-                    <li>NISN harus unik (10 digit) dan belum terdaftar</li>
+                    <li>NIS harus unik (10 digit) dan belum terdaftar</li>
                     <li>Hapus 2 baris contoh data sebelum upload</li>
                     <li>Upload file yang sudah diisi</li>
                 </ol>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kelas extends Model
 {
     public $table = 'tb_kelas';
+    public $timestamps = true;  // Ensure timestamps are managed
 
     public $fillable = [
         'kode',

@@ -2,9 +2,10 @@
 <div class="form-group col-sm-6">
     {!! Form::label('kelas', 'Kelas:') !!}<span class="text-danger">*</span>
     {!! Form::select('kelas', $kelas, null, [
-        'class' => 'form-control pendapatan-field',
+        'class' => 'form-control pendapatan-field selectpicker',
         'id' => 'kelas',
-        'placeholder' => 'Pilih kelas'
+        'placeholder' => 'Pilih kelas',
+        'data-live-search' => 'true'
     ]) !!}
 </div>
 

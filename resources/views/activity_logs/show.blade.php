@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1 class="mb-1"><i class="fas fa-file-alt me-2 text-primary"></i>Detail Log Aktivitas</h1>
             <nav aria-label="breadcrumb">
@@ -21,102 +21,109 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white border-bottom">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 mb-2">
+                <div class="card-header bg-white border-bottom py-2">
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Informasi Umum</h5>
                 </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th width="200">Waktu</th>
-                            <td>{{ $log->created_at->format('d M Y H:i:s') }} ({{ $log->created_at->diffForHumans() }})</td>
-                        </tr>
-                        <tr>
-                            <th>User</th>
-                            <td>
-                                @if($log->user)
-                                    <strong>{{ $log->user->name }}</strong> ({{ $log->user->email }})
-                                    <br>
-                                    <small class="text-muted">
-                                        Role: 
-                                        @foreach($log->user->roles as $role)
-                                            <span class="badge bg-primary">{{ $role->name }}</span>
-                                        @endforeach
-                                    </small>
-                                @else
-                                    <span class="text-muted">System</span>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Aksi</th>
-                            <td>
-                                <span class="badge bg-{{ $log->action === 'created' ? 'success' : ($log->action === 'updated' ? 'warning' : 'danger') }}">
-                                    {{ strtoupper($log->action) }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Model Type</th>
-                            <td>
-                                <code>{{ $log->model_type }}</code>
-                                <br><small class="text-muted">Class: {{ class_basename($log->model_type) }}</small>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Model ID</th>
-                            <td><strong>{{ $log->model_id }}</strong></td>
-                        </tr>
-                        <tr>
-                            <th>Deskripsi</th>
-                            <td>{{ $log->description }}</td>
-                        </tr>
-                    </table>
+                <div class="card-body py-2">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong class="text-muted small">Waktu</strong>
+                                <p class="mb-0 small">{{ $log->created_at->format('d M Y H:i:s') }} ({{ $log->created_at->diffForHumans() }})</p>
+                            </div>
+                            <div class="mb-0">
+                                <strong class="text-muted small">Aksi</strong>
+                                <p class="mb-0">
+                                    <span class="badge bg-{{ $log->action === 'created' ? 'success' : ($log->action === 'updated' ? 'warning' : 'danger') }} small">
+                                        <i class="fas fa-{{ $log->action === 'created' ? 'plus-circle' : ($log->action === 'updated' ? 'edit' : 'trash-alt') }} me-1"></i>{{ strtoupper($log->action) }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong class="text-muted small">User</strong>
+                                <p class="mb-0 small">
+                                    @if($log->user)
+                                        {{ $log->user->name }} ({{ $log->user->email }})
+                                    @else
+                                        <span class="text-muted">System</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="mb-0">
+                                <strong class="text-muted small">Model</strong>
+                                <p class="mb-0 small">{{ class_basename($log->model_type) }} (ID: {{ $log->model_id }})</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            @if($log->old_values)
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0"><i class="fas fa-history me-2 text-warning"></i>Nilai Lama</h5>
+            @if($log->action === 'created' && $log->new_values)
+            <div class="card shadow-sm border-0 mb-2">
+                <div class="card-header bg-white border-bottom py-2">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2 text-success"></i>Nilai yang Dibuat</h5>
                 </div>
-                <div class="card-body">
-                    <pre class="bg-light p-3 rounded"><code>{{ json_encode($log->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                <div class="card-body py-2">
+                    <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                </div>
+            </div>
+            @elseif($log->action === 'updated')
+                @if($log->old_values && $log->new_values)
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white border-bottom py-2">
+                                <h5 class="mb-0"><i class="fas fa-history me-2 text-warning"></i>Nilai Lama</h5>
+                            </div>
+                            <div class="card-body py-2">
+                                <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white border-bottom py-2">
+                                <h5 class="mb-0"><i class="fas fa-edit me-2 text-info"></i>Nilai Baru</h5>
+                            </div>
+                            <div class="card-body py-2">
+                                <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @elseif($log->old_values)
+                <div class="card shadow-sm border-0 mb-2">
+                    <div class="card-header bg-white border-bottom py-2">
+                        <h5 class="mb-0"><i class="fas fa-history me-2 text-warning"></i>Nilai Lama</h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                    </div>
+                </div>
+                @elseif($log->new_values)
+                <div class="card shadow-sm border-0 mb-2">
+                    <div class="card-header bg-white border-bottom py-2">
+                        <h5 class="mb-0"><i class="fas fa-edit me-2 text-info"></i>Nilai Baru</h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                    </div>
+                </div>
+                @endif
+            @elseif($log->action === 'deleted' && $log->old_values)
+            <div class="card shadow-sm border-0 mb-2">
+                <div class="card-header bg-white border-bottom py-2">
+                    <h5 class="mb-0"><i class="fas fa-trash-alt me-2 text-danger"></i>Nilai yang Dihapus</h5>
+                </div>
+                <div class="card-body py-2">
+                    <pre class="bg-light p-2 rounded mb-0" style="font-size: 0.8rem; max-height: 300px; overflow-y: auto;"><code>{{ json_encode($log->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
                 </div>
             </div>
             @endif
-
-            @if($log->new_values)
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2 text-success"></i>Nilai Baru</h5>
-                </div>
-                <div class="card-body">
-                    <pre class="bg-light p-3 rounded"><code>{{ json_encode($log->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
-                </div>
-            </div>
-            @endif
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Metadata</h5>
-                </div>
-                <div class="card-body">
-                    <dl class="mb-0">
-                        <dt>Log ID</dt>
-                        <dd><code>#{{ $log->id }}</code></dd>
-
-                        <dt>IP Address</dt>
-                        <dd>{{ $log->ip_address ?? '-' }}</dd>
-
-                        <dt>User Agent</dt>
-                        <dd><small>{{ $log->user_agent ?? '-' }}</small></dd>
-                    </dl>
-                </div>
-            </div>
         </div>
     </div>
 </div>

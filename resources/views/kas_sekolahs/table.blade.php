@@ -14,7 +14,7 @@
             <tbody>
             @foreach($kasSekolahs as $kasSekolah)
                 <tr>
-                    <td>{{ \Carbon\Carbon::parse($kasSekolah->tanggal)->translatedFormat('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($kasSekolah->tanggal)->translatedFormat('d M Y H:i:s') }}</td>
                     <td>{{ $kasSekolah->catatan }}</td>
                     <td>
                         {{ $kasSekolah->tipe == 1 ? 'Pendapatan' : ($kasSekolah->tipe == 2 ? 'Pengeluaran' : '-') }}

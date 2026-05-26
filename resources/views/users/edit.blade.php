@@ -51,7 +51,7 @@
 
                         <div class="mb-3">
                             <label for="role" class="form-label">Role<span class="text-danger">*</span></label>
-                            <select class="form-select" id="role" name="role" required {{ isset($isEditingSelf) && $isEditingSelf ? 'disabled' : '' }}>
+                            <select class="form-select selectpicker" id="role" name="role" required data-live-search="true" {{ isset($isEditingSelf) && $isEditingSelf ? 'disabled' : '' }}>
                                 <option value="">Pilih Role</option>
                                 @foreach($roles as $role)
                                 <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>

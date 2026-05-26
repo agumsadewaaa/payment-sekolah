@@ -40,7 +40,7 @@ class ActivityLoggingTest extends TestCase
         $this->actingAs($admin)
             ->post('/siswas', [
                 'nama' => 'Log Siswa',
-                'nisn' => '999999999',
+                'nis' => '999999999',
                 'kontak_ortu' => '0812345678',
                 'kelas' => '10',
                 'jurusan' => $kelas->id,
@@ -57,7 +57,7 @@ class ActivityLoggingTest extends TestCase
 
         // update
         $this->actingAs($admin)
-            ->put('/siswas/'.$siswa->id, ['nama' => 'Log Siswa Updated', 'nisn' => $siswa->nisn, 'kelas' => $siswa->kelas, 'jurusan' => $siswa->jurusan, 'kontak_ortu' => $siswa->kontak_ortu, 'tahun_masuk' => $siswa->tahun_masuk, 'tahun_lulus' => $siswa->tahun_lulus, 'status_siswa' => $siswa->status_siswa])
+            ->put('/siswas/'.$siswa->id, ['nama' => 'Log Siswa Updated', 'nis' => $siswa->nis, 'kelas' => $siswa->kelas, 'jurusan' => $siswa->jurusan, 'kontak_ortu' => $siswa->kontak_ortu, 'tahun_masuk' => $siswa->tahun_masuk, 'tahun_lulus' => $siswa->tahun_lulus, 'status_siswa' => $siswa->status_siswa])
             ->assertRedirect();
 
         $this->assertDatabaseHas('activity_logs', ['action' => 'updated', 'model_type' => 'App\\Models\\Siswa', 'model_id' => (string) $siswa->id]);

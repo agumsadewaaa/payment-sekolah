@@ -26,13 +26,21 @@ class KasSiswa extends Model
         'kas_sekolah_id' => 'integer',
         'siswa_id' => 'integer',
         'tagihan_id' => 'integer',
-        'tanggal' => 'date',
+        'tanggal' => 'datetime',
         'metode_pembayaran' => 'string',
         'nominal' => 'integer',
         'status' => 'string'
     ];
 
-    public static array $rules = [];
+    public static array $rules = [
+        'kas_sekolah_id' => 'required|integer|exists:tb_kas_sekolah,id',
+        'siswa_id' => 'required|integer|exists:tb_siswa,id',
+        'tagihan_id' => 'required|integer|exists:tb_tagihan_siswa,id',
+        'tanggal' => 'required|date',
+        'metode_pembayaran' => 'nullable|string|max:50',
+        'nominal' => 'required|integer|min:1',
+        'status' => 'required|string|in:lunas,belum_lunas'
+    ];
 
     public function siswa()
     {

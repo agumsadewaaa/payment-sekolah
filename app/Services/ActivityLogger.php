@@ -28,8 +28,8 @@ class ActivityLogger
             'action' => $action,
             'model_type' => $modelType,
             'model_id' => $modelId ? (string) $modelId : null,
-            'old_values' => $oldValues ? json_encode($oldValues) : null,
-            'new_values' => $newValues ? json_encode($newValues) : null,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
             'description' => $description,
         ]);
     }

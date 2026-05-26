@@ -30,7 +30,7 @@ $sheet = $spreadsheet->getActiveSheet();
 // Set header kolom di baris pertama (WAJIB untuk WithHeadingRow)
 $headers = [
     'A1' => 'Nama',
-    'B1' => 'NISN',
+    'B1' => 'NIS',
     'C1' => 'Kontak Ortu',
     'D1' => 'Kelas',
     'E1' => 'Jurusan',
@@ -57,7 +57,7 @@ $query = "
     SELECT 
         s.id,
         s.nama,
-        s.nisn,
+        s.nis,
         s.kontak_ortu,
         s.kelas,
         k.jurusan,
@@ -79,7 +79,7 @@ if (empty($siswaList)) {
         [
             'id' => 1,
             'nama' => 'Ahmad Fauzi',
-            'nisn' => "'0012345678",
+            'nis' => "'0012345678",
             'kontak_ortu' => "'081234567890",
             'kelas' => 10,
             'jurusan' => 'Teknik Komputer Jaringan',
@@ -89,7 +89,7 @@ if (empty($siswaList)) {
         [
             'id' => 2,
             'nama' => 'Siti Nurhaliza',
-            'nisn' => "'0012345679",
+            'nis' => "'0012345679",
             'kontak_ortu' => "'081234567891",
             'kelas' => 11,
             'jurusan' => 'Akuntansi',
@@ -99,7 +99,7 @@ if (empty($siswaList)) {
         [
             'id' => 3,
             'nama' => 'Budi Santoso',
-            'nisn' => "'0012345680",
+            'nis' => "'0012345680",
             'kontak_ortu' => "'081234567892",
             'kelas' => 12,
             'jurusan' => 'Teknik Komputer Jaringan',
@@ -235,7 +235,7 @@ foreach ($siswaList as $siswa) {
     
     // Isi data ke Excel
     $sheet->setCellValue('A' . $row, $siswa['nama']);
-    $sheet->setCellValueExplicit('B' . $row, $siswa['nisn'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit('B' . $row, $siswa['nis'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
     $sheet->setCellValueExplicit('C' . $row, $siswa['kontak_ortu'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
     $sheet->setCellValue('D' . $row, $siswa['kelas']);
     $sheet->setCellValue('E' . $row, $siswa['jurusan']);
@@ -269,7 +269,7 @@ $sheet->getStyle('A' . ($row + 1))->getFont()->setBold(true);
 
 $keterangan = [
     '- Nama: Nama lengkap siswa',
-    '- NISN: Nomor Induk Siswa Nasional (format text)',
+    '- NIS: Nomor Induk Siswa (format text)',
     '- Kontak Ortu: Nomor HP orang tua (opsional)',
     '- Kelas: Angka kelas (10, 11, atau 12)',
     '- Jurusan: Nama jurusan (contoh: Teknik Komputer Jaringan, Akuntansi, Teknik Kendaraan Ringan)',

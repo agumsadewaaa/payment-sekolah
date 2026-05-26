@@ -5,16 +5,21 @@ namespace App\Exports;
 use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\KasSiswa;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class SiswaExport implements FromArray, WithHeadings
+class SiswaExport implements FromArray, WithHeadings, WithEvents
 {
     protected $siswa;
+    protected $exportedAt;
 
     public function __construct(Siswa $siswa)
     {
         $this->siswa = $siswa;
+        $this->exportedAt = Carbon::now();
     }
 
     public function array(): array
@@ -37,8 +42,9 @@ class SiswaExport implements FromArray, WithHeadings
         $result[] = ['DAFTAR TAGIHAN SISWA'];
         $result[] = [];
         $result[] = ['Nama', $this->siswa->nama];
-        $result[] = ['NISN', $this->siswa->nisn];
+        $result[] = ['NIS', $this->siswa->nis];
         $result[] = ['Kelas', $this->siswa->kelas];
+        $result[] = ['Export', $this->exportedAt->format('d M Y H:i')];
         $result[] = [];
         
         // Header tabel tagihan
@@ -76,7 +82,7 @@ class SiswaExport implements FromArray, WithHeadings
                     $result[] = [
                         '',
                         'Angsuran ' . ($i + 1),
-                        \Carbon\Carbon::parse($p->tanggal)->format('d-M-Y'),
+                        $p->tanggal,
                         $p->metode_pembayaran ?? '-',
                         $p->nominal
                     ];
@@ -91,6 +97,20 @@ class SiswaExport implements FromArray, WithHeadings
     public function headings(): array
     {
         return [];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                $highestRow = $sheet->getHighestRow();
+
+                // Format tanggal ke format dd-mm-yyyy
+                $sheet->getStyle("C8:C{$highestRow}")
+                      ->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+            },
+        ];
     }
 }
 

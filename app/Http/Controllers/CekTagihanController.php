@@ -27,7 +27,7 @@ class CekTagihanController extends Controller
             $keyword = $request->keyword;
 
             $siswa = Siswa::where('nama', $keyword)
-                ->orWhere('nisn', $keyword)
+                ->orWhere('nis', $keyword)
                 ->first();
 
             if (!$siswa) {
@@ -182,6 +182,19 @@ class CekTagihanController extends Controller
             $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
         }
 
+        // Convert e-signature to base64
+        $signatureBase64 = '';
+        if (file_exists(public_path('e-signature.jpg'))) {
+            $sigData = file_get_contents(public_path('e-signature.jpg'));
+            $signatureBase64 = 'data:image/jpeg;base64,' . base64_encode($sigData);
+        } elseif (file_exists(public_path('e-signature.jpeg'))) {
+            $sigData = file_get_contents(public_path('e-signature.jpeg'));
+            $signatureBase64 = 'data:image/jpeg;base64,' . base64_encode($sigData);
+        } elseif (file_exists(public_path('e-signature.png'))) {
+            $sigData = file_get_contents(public_path('e-signature.png'));
+            $signatureBase64 = 'data:image/png;base64,' . base64_encode($sigData);
+        }
+
         $pdf = PDF::loadView('print.tagihan', [
             'siswa'        => $siswa,
             'belum'        => $belum,
@@ -191,15 +204,16 @@ class CekTagihanController extends Controller
             'totalSisa'    => $totalSisa,
             'progress'     => $progress,
             'logoBase64'   => $logoBase64,
+            'signatureBase64' => $signatureBase64,
         ])->setPaper('A4','portrait');
 
-        return $pdf->stream("tagihan-{$siswa->nisn}.pdf");
+        return $pdf->stream("tagihan-{$siswa->nis}.pdf");
     }
 
     // Export detail siswa (Excel)
     public function export($id)
     {
         $siswa = Siswa::findOrFail($id);
-        return Excel::download(new SiswaExport($siswa), "tagihan-{$siswa->nisn}.xlsx");
+        return Excel::download(new SiswaExport($siswa), "tagihan-{$siswa->nis}.xlsx");
     }
 }

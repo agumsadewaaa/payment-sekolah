@@ -9,7 +9,7 @@ class SiswaRepository extends BaseRepository
 {
     protected $fieldSearchable = [
         'nama',
-        'nisn',
+        'nis',
         'kontak_ortu',
         'kelas',
         'jurusan',

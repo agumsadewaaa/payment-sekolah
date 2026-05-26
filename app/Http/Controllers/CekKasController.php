@@ -28,8 +28,8 @@ class CekKasController extends Controller
             $fromDate = Carbon::parse($from)->startOfDay();
             $toDate   = Carbon::parse($to)->endOfDay();
 
-            // Saldo sebelum 'from'
-            $saldoSebelumnya = KasSekolah::where('tanggal', '<', $fromDate)
+            // Saldo sebelum 'from' (exclude import excel)
+            $saldoSebelumnya = KasSekolah::nonImport()->where('tanggal', '<', $fromDate)
                 ->selectRaw("
                     SUM(CASE WHEN tipe = '1' THEN nominal 
                              WHEN tipe = '2' THEN -nominal 
@@ -37,8 +37,8 @@ class CekKasController extends Controller
                 ")
                 ->value('saldo') ?? 0;
 
-            // Data pada rentang
-            $rows = KasSekolah::whereBetween('tanggal', [$fromDate, $toDate])
+            // Data pada rentang (exclude import excel)
+            $rows = KasSekolah::nonImport()->whereBetween('tanggal', [$fromDate, $toDate])
                 ->orderBy('tanggal', 'asc')
                 ->get();
 

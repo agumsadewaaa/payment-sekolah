@@ -35,7 +35,7 @@ class HomeViewFallbackTest extends TestCase
         ])->render();
 
         // The page should display fallback dash for monetary values and 0 for total siswa
-        $this->assertStringContainsString('<h4 class="mb-0">0</h4>', $html);
+        $this->assertStringContainsString('<h3 class="mb-0 fw-bold">0</h3>', $html);
         $this->assertStringContainsString('—', $html); // fallback dash should appear for null currency fields
 
         // Table fallback messages

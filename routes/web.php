@@ -58,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-siswa-by-kelas/{kelas}', [App\Http\Controllers\SiswaController::class, 'getSiswaByKelas']);
     Route::get('/get-tagihan-by-siswa/{siswa_id}', [App\Http\Controllers\SiswaController::class, 'getTagihanBySiswa']);
     Route::get('/get-sisa-tagihan/{siswa_id}/{tagihan_id}', [App\Http\Controllers\SiswaController::class, 'getSisaTagihan']);
+    Route::get('/get-tagihan-info/{siswa_id}/{kelas_id}/{tagihan_id}', [App\Http\Controllers\SiswaController::class, 'getTagihanInfo']);
+    Route::get('/get-outstanding-bills/{siswa_id}', [App\Http\Controllers\SiswaController::class, 'getOutstandingBills']);
     Route::get('/get-jurusan/{kelas}', [App\Http\Controllers\KelasController::class, 'getJurusan']);
     Route::resource('tagihans', App\Http\Controllers\TagihanController::class);
 

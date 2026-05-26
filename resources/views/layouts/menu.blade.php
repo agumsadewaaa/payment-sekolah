@@ -5,12 +5,6 @@
     </a>
 </li>
 
-<li><a href="{{ route('siswas.index') }}" class="ai-icon">
-        <i class="nav-icon fas fa-person"></i>
-        <span>Siswa</span>
-    </a>
-</li>
-
 <li><a href="{{ route('kelas.index') }}" class="ai-icon">
         <i class="flaticon-381-internet"></i>
         <span>Kelas</span>
@@ -20,6 +14,12 @@
 <li><a href="{{ route('tagihans.index') }}" class="ai-icon">
         <i class="flaticon-381-notepad"></i>
         <span>Tagihan</span>
+    </a>
+</li>
+
+<li><a href="{{ route('siswas.index') }}" class="ai-icon">
+        <i class="nav-icon fas fa-person"></i>
+        <span>Siswa</span>
     </a>
 </li>
 
