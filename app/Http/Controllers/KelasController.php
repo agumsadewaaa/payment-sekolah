@@ -49,6 +49,22 @@ class KelasController extends AppBaseController
 
         $kelas = $this->kelasRepository->create($input);
 
+        // Auto-create kelas=0 (Lulus) untuk jurusan ini jika belum ada
+        if ($kelas && $kelas->kelas != '0') {
+            $existingLulus = \App\Models\Kelas::where('kelas', '0')
+                ->where('jurusan', $kelas->jurusan)
+                ->first();
+            if (!$existingLulus) {
+                $kodeParts = explode('-', $kelas->kode);
+                $kodeJurusan = count($kodeParts) > 1 ? $kodeParts[1] : strtoupper(substr($kelas->jurusan, 0, 3));
+                \App\Models\Kelas::create([
+                    'kode' => 'LULUS-' . $kodeJurusan,
+                    'kelas' => '0',
+                    'jurusan' => $kelas->jurusan,
+                ]);
+            }
+        }
+
         Flash::success('Kelas saved successfully.');
 
         return redirect(route('kelas.index'));
@@ -63,6 +79,12 @@ class KelasController extends AppBaseController
 
         if (empty($kelas)) {
             Flash::error('Kelas not found');
+
+            return redirect(route('kelas.index'));
+        }
+
+        if ($kelas->kelas == '0') {
+            Flash::error('Kelas tidak tersedia');
 
             return redirect(route('kelas.index'));
         }
@@ -83,6 +105,12 @@ class KelasController extends AppBaseController
             return redirect(route('kelas.index'));
         }
 
+        if ($kelas->kelas == '0') {
+            Flash::error('Kelas tidak tersedia');
+
+            return redirect(route('kelas.index'));
+        }
+
         return view('kelas.edit')->with('kelas', $kelas);
     }
 
@@ -95,6 +123,12 @@ class KelasController extends AppBaseController
 
         if (empty($kelas)) {
             Flash::error('Kelas not found');
+
+            return redirect(route('kelas.index'));
+        }
+
+        if ($kelas->kelas == '0') {
+            Flash::error('Kelas tidak tersedia');
 
             return redirect(route('kelas.index'));
         }
@@ -117,6 +151,12 @@ class KelasController extends AppBaseController
 
         if (empty($kelas)) {
             Flash::error('Kelas not found');
+
+            return redirect(route('kelas.index'));
+        }
+
+        if ($kelas->kelas == '0') {
+            Flash::error('Kelas tidak tersedia');
 
             return redirect(route('kelas.index'));
         }

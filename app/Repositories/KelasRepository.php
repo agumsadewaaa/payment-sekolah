@@ -32,7 +32,7 @@ class KelasRepository extends BaseRepository
 
     public function getAllOrderedByKode()
     {
-        return $this->model->orderBy('kode', 'asc')->paginate(10);
+        return $this->model->where('kelas', '!=', '0')->orderBy('kode', 'asc')->paginate(10);
     }
 
 }

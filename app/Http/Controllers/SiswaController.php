@@ -134,7 +134,25 @@ class SiswaController extends AppBaseController
 
     public function getSiswaByKelas($kelas)
     {
-        $siswas = Siswa::where('jurusan', $kelas)->pluck('nama', 'id');
+        // $kelas di sini adalah ID kelas, cari tahu tipe kelas-nya
+        $kelasData = \App\Models\Kelas::find($kelas);
+        
+        if (!$kelasData) {
+            return response()->json([]);
+        }
+        
+        // Jika kelas type = 0 (lulus), ambil siswa yang sudah lulus
+        // Jika kelas type lainnya (10, 11, 12), ambil siswa aktif
+        if ($kelasData->kelas == 0) {
+            $siswas = Siswa::where('jurusan', $kelas)
+                ->where('status_siswa', 'Aktif-Lulus')
+                ->pluck('nama', 'id');
+        } else {
+            $siswas = Siswa::where('jurusan', $kelas)
+                ->where('status_siswa', 'Aktif')
+                ->pluck('nama', 'id');
+        }
+        
         return response()->json($siswas);
     }
 
@@ -148,9 +166,14 @@ class SiswaController extends AppBaseController
 
             $previousClasses = collect();
             if ($siswa->jurusans) {
-                $previousClasses = Kelas::where('jurusan', $siswa->jurusans->jurusan)
-                    ->where('kelas', '<', $siswa->jurusans->kelas)
-                    ->pluck('id');
+                $kelasQuery = Kelas::where('jurusan', $siswa->jurusans->jurusan)
+                    ->where('kelas', '!=', '0');
+                if ($siswa->jurusans->kelas == '0') {
+                    // Lulus: cek semua kelas aktif (10, 11, 12)
+                    $previousClasses = $kelasQuery->pluck('id');
+                } else {
+                    $previousClasses = $kelasQuery->where('kelas', '<', $siswa->jurusans->kelas)->pluck('id');
+                }
                 if ($previousClasses->count() > 0) {
                     $previousTagihanIds = Tagihan::whereIn('kelas', $previousClasses)->pluck('id');
                     $allTagihanIdsForSiswa = $allTagihanIdsForSiswa->merge($previousTagihanIds)->unique();
@@ -192,15 +215,22 @@ class SiswaController extends AppBaseController
                         return $status;
                     })
                     ->map(function ($t) {
+                        $tingkat = $t->kelass ? $t->kelass->kelas : '?';
                         return [
                             'id' => $t->id,
-                            'label' => $t->tagihan . ' [TUNGGAKAN]'
+                            'label' => $t->tagihan . ' [TUNGGAKAN] (kelas ' . $tingkat . ')'
                         ];
                     });
             }
 
-            // Combine semua tagihan
-            $allTagihans = $tagihanKelasSaatIni->merge($tagihanKelasLama);
+            // Combine semua tagihan (pakai concat untuk hindari error merge Eloquent Collection)
+            $allTagihans = collect();
+            foreach ($tagihanKelasSaatIni as $t) {
+                $allTagihans->push($t);
+            }
+            foreach ($tagihanKelasLama as $t) {
+                $allTagihans->push($t);
+            }
             
             // Convert ke format untuk dropdown
             $result = [];
@@ -254,10 +284,16 @@ class SiswaController extends AppBaseController
         $totalOutstanding = 0;
         
         // Check for previous classes with unpaid bills
-        if ((int)$siswa->jurusans?->kelas >= 11) {
-            $previousClasses = Kelas::where('jurusan', $siswa->jurusans?->jurusan)
-                ->where('kelas', '<', $siswa->jurusans?->kelas)
-                ->pluck('id');
+        $siswaKelas = $siswa->jurusans?->kelas;
+        if ((int)$siswaKelas >= 11 || $siswaKelas == '0') {
+            $kelasQuery = Kelas::where('jurusan', $siswa->jurusans?->jurusan)
+                ->where('kelas', '!=', '0');
+            if ($siswaKelas == '0') {
+                // Lulus: cek semua kelas aktif (10, 11, 12)
+                $previousClasses = $kelasQuery->pluck('id');
+            } else {
+                $previousClasses = $kelasQuery->where('kelas', '<', $siswaKelas)->pluck('id');
+            }
             
             if ($previousClasses->count() > 0) {
                 $previousTagihans = Tagihan::whereIn('kelas', $previousClasses)->get();

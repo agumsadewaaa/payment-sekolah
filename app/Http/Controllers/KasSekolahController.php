@@ -41,13 +41,25 @@ class KasSekolahController extends AppBaseController
      */
     public function create()
     {
-        $semuaKelas = \App\Models\Kelas::orderBy('kode', 'asc')->get();
-        $kelas = $semuaKelas->pluck('kode', 'id');
+        $semuaKelas = \App\Models\Kelas::orderBy('kelas', 'asc')
+                                        ->orderBy('jurusan', 'asc')->get();
+        $kelas = collect();
 
-        // Tambah opsi "Lulus" untuk setiap jurusan (pakai ID kelas 12)
-        $kelasLulus = $semuaKelas->where('kelas', '12');
+        // Kelas Aktif (10, 11, 12)
+        $kelasAktif = $semuaKelas->whereIn('kelas', ['10', '11', '12']);
+        foreach ($kelasAktif as $k) {
+            $kelas->put($k->id, $k->kode);
+        }
+
+        // Kelas Lulus (0) - hanya tampilkan jika ada siswa lulus
+        $kelasLulus = $semuaKelas->where('kelas', 0);
         foreach ($kelasLulus as $k) {
-            $kelas->put($k->id, 'Lulus - ' . $k->jurusan);
+            $siswaLulus = \App\Models\Siswa::where('jurusan', $k->id)
+                ->where('status_siswa', 'Aktif-Lulus')
+                ->count();
+            if ($siswaLulus > 0) {
+                $kelas->put($k->id, 'Lulus - ' . $k->jurusan);
+            }
         }
 
         return view('kas_sekolahs.create', compact('kelas'));
@@ -90,7 +102,23 @@ class KasSekolahController extends AppBaseController
                 Flash::error('Pembayaran melebihi sisa tagihan! Sisa tagihan: Rp ' . number_format($sisaTagihan, 0, ',', '.'));
                 
                 // Kembalikan dengan data kelas untuk dropdown
-                $kelasOptions = \App\Models\Kelas::orderBy('kode', 'asc')->pluck('kode', 'id');
+                $semuaKelas = \App\Models\Kelas::orderBy('kelas', 'asc')->orderBy('jurusan', 'asc')->get();
+                $kelasOptions = collect();
+
+                $kelasAktif = $semuaKelas->whereIn('kelas', ['10', '11', '12']);
+                foreach ($kelasAktif as $k) {
+                    $kelasOptions->put($k->id, $k->kode);
+                }
+
+                $kelasLulus = $semuaKelas->where('kelas', 0);
+                foreach ($kelasLulus as $k) {
+                    $siswaLulus = \App\Models\Siswa::where('jurusan', $k->id)
+                        ->where('status_siswa', 'Aktif-Lulus')
+                        ->count();
+                    if ($siswaLulus > 0) {
+                        $kelasOptions->put($k->id, 'Lulus - ' . $k->jurusan);
+                    }
+                }
                 return redirect()->back()->withInput()->with('kelas', $kelasOptions);
             }
 
@@ -109,10 +137,14 @@ class KasSekolahController extends AppBaseController
             $previousClasses = collect();
             $previousTagihans = collect();
 
-            if ($kelas && (int)$kelas->kelas >= 11) {
-                $previousClasses = Kelas::where('jurusan', $kelas->jurusan)
-                    ->where('kelas', '<', $kelas->kelas)
-                    ->pluck('id');
+            if ($kelas && ((int)$kelas->kelas >= 11 || $kelas->kelas == '0')) {
+                $kelasQuery = Kelas::where('jurusan', $kelas->jurusan)
+                    ->where('kelas', '!=', '0');
+                if ($kelas->kelas == '0') {
+                    $previousClasses = $kelasQuery->pluck('id');
+                } else {
+                    $previousClasses = $kelasQuery->where('kelas', '<', $kelas->kelas)->pluck('id');
+                }
                 
                 if ($previousClasses->count() > 0) {
                     $previousTagihans = Tagihan::whereIn('kelas', $previousClasses)->get();
@@ -270,13 +302,25 @@ class KasSekolahController extends AppBaseController
             return redirect(route('kas-sekolahs.index'));
         }
 
-        $semuaKelas = \App\Models\Kelas::orderBy('kode', 'asc')->get();
-        $kelas = $semuaKelas->pluck('kode', 'id');
+        $semuaKelas = \App\Models\Kelas::orderBy('kelas', 'asc')
+                                        ->orderBy('jurusan', 'asc')->get();
+        $kelas = collect();
 
-        // Tambah opsi "Lulus" untuk setiap jurusan (pakai ID kelas 12)
-        $kelasLulus = $semuaKelas->where('kelas', '12');
+        // Kelas Aktif (10, 11, 12)
+        $kelasAktif = $semuaKelas->whereIn('kelas', ['10', '11', '12']);
+        foreach ($kelasAktif as $k) {
+            $kelas->put($k->id, $k->kode);
+        }
+
+        // Kelas Lulus (0) - hanya tampilkan jika ada siswa lulus
+        $kelasLulus = $semuaKelas->where('kelas', 0);
         foreach ($kelasLulus as $k) {
-            $kelas->put($k->id, 'Lulus - ' . $k->jurusan);
+            $siswaLulus = \App\Models\Siswa::where('jurusan', $k->id)
+                ->where('status_siswa', 'Aktif-Lulus')
+                ->count();
+            if ($siswaLulus > 0) {
+                $kelas->put($k->id, 'Lulus - ' . $k->jurusan);
+            }
         }
 
         // Jika tipe pendapatan, ambil data siswa dan tagihan dari KasSiswa

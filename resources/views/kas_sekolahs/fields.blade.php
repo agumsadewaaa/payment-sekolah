@@ -98,6 +98,7 @@
             ]) !!}
         </div>
     </div>
+</div>
 
 <!-- ====== Form Pengeluaran ====== -->
 <div id="form-pengeluaran" style="display:none;">
@@ -201,12 +202,15 @@ $(function() {
 // include central nominal formatting script
 @include('partials.nominal-input')
 
+var maxSisaTagihan = 0;
+
 $(document).ready(function() {
     // Kelas -> siswa
     $('#kelas').on('change', function() {
         var kelas = $(this).val();
         $('#siswa_id').empty().append('<option value="">Loading...</option>');
         $('#tagihan_id').empty().append('<option value="">Pilih tagihan</option>');
+        resetNominalValidation();
         if (kelas) {
             $.get('/get-siswa-by-kelas/' + kelas, function(data) {
                 $('#siswa_id').empty().append('<option value="">Pilih nama siswa</option>');
@@ -223,6 +227,7 @@ $(document).ready(function() {
     // Siswa -> tagihan
     $('#siswa_id').on('change', function() {
         var siswa_id = $(this).val();
+        resetNominalValidation();
         
         // Check for outstanding bills
         if(siswa_id) {
@@ -283,6 +288,7 @@ $(document).ready(function() {
         var tagihan_id = $(this).val();
         var siswa_id = $('#siswa_id').val();
         var kelas_id = $('#kelas').val();
+        resetNominalValidation();
         
         if(tagihan_id && siswa_id) {
             @if(!isset($kasSekolah))
@@ -290,6 +296,7 @@ $(document).ready(function() {
                 $.get('/get-sisa-tagihan/' + siswa_id + '/' + tagihan_id, function(response) {
                     if(response.sisa !== undefined) {
                         var sisaTagihan = response.sisa;
+                        maxSisaTagihan = sisaTagihan;
                         var nominalInput = $('#nominal');
                         
                         // Set max attribute hanya untuk create
@@ -304,6 +311,9 @@ $(document).ready(function() {
                         } else {
                             $('#info-sisa').text('Sisa tagihan: Rp ' + sisaTagihan.toLocaleString('id-ID'));
                         }
+                        
+                        // Validasi nominal saat ini juga
+                        validateNominal();
                     }
                 });
             @else
@@ -318,7 +328,50 @@ $(document).ready(function() {
             });
         }
     });
+
+    // Validasi nominal setiap kali input berubah
+    $('#nominal').on('input', function() {
+        validateNominal();
+    });
+
+    // Prevent form submit jika nominal melebihi sisa tagihan
+    $('form').on('submit', function(e) {
+        if ($('#tipe').val() === '1' && maxSisaTagihan > 0) {
+            var nominal = parseInt($('#nominal').val().replace(/\D/g, '')) || 0;
+            if (nominal > maxSisaTagihan) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Nominal tidak boleh melebihi sisa tagihan!'
+                });
+                return false;
+            }
+        }
+    });
 });
+
+function resetNominalValidation() {
+    maxSisaTagihan = 0;
+    $('#warning-nominal').remove();
+    $('#info-sisa').remove();
+    $('#nominal').removeAttr('max').attr('placeholder', 'Masukkan nominal');
+}
+
+function validateNominal() {
+    var nominal = parseInt($('#nominal').val().replace(/\D/g, '')) || 0;
+    if (maxSisaTagihan > 0 && nominal > maxSisaTagihan) {
+        if ($('#warning-nominal').length === 0) {
+            $('#nominal').closest('.form-group').append(
+                '<small id="warning-nominal" class="text-danger"><i class="fas fa-exclamation-circle"></i> Nominal tidak boleh melebihi sisa tagihan!</small>'
+            );
+        }
+        $('#nominal').addClass('is-invalid');
+    } else {
+        $('#warning-nominal').remove();
+        $('#nominal').removeClass('is-invalid');
+    }
+}
 </script>
 @endpush
 
