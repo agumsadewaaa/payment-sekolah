@@ -14,6 +14,7 @@ class ActivityLog extends Model
         'user_id' => 'integer',
         'old_values' => 'array',
         'new_values' => 'array',
+        'duration_ms' => 'integer',
     ];
 
     public function user()

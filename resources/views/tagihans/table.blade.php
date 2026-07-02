@@ -3,6 +3,8 @@
         <table id="example3" class="display min-w850">
             <thead>
             <tr>
+                <th width="50"><input type="checkbox" id="select-all"></th>
+                <th>No</th>
                 <th>Kelas</th>
                 <th>Tagihan</th>
                 <th>Nominal</th>
@@ -12,6 +14,8 @@
             <tbody>
             @foreach($tagihans as $tagihan)
                 <tr>
+                    <td><input type="checkbox" class="row-checkbox" value="{{ $tagihan->id }}"></td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $tagihan->kelass ? $tagihan->kelass->kode : '-' }}</td>
                     <td>{{ $tagihan->tagihan }}</td>
                     <td>Rp {{ number_format($tagihan->nominal, 0, ',', '.') }}</td>

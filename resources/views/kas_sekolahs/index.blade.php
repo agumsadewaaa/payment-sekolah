@@ -30,6 +30,7 @@
                     <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Daftar Transaksi</h5>
                 </div>
                 <div class="card-body p-0">
+                    @include('partials.bulk-delete', ['route' => 'kas-sekolahs.bulk-delete'])
                     @include('kas_sekolahs.table')
                 </div>
             </div>

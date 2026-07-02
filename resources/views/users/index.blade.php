@@ -28,10 +28,12 @@
                     <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Daftar User</h5>
                 </div>
                 <div class="card-body">
+                    @include('partials.bulk-delete', ['route' => 'users.bulk-delete'])
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th width="50"><input type="checkbox" id="select-all"></th>
                                     <th width="50">#</th>
                                     <th>Nama</th>
                                     <th>Email</th>
@@ -43,6 +45,7 @@
                             <tbody>
                                 @forelse($users as $user)
                                 <tr>
+                                    <td><input type="checkbox" class="row-checkbox" value="{{ $user->id }}"></td>
                                     <td>{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
                                     <td>
                                         <strong>{{ $user->name }}</strong>
@@ -82,7 +85,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
+                                    <td colspan="7" class="text-center py-4">
                                         <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                                         <p class="text-muted">Tidak ada data user</p>
                                     </td>

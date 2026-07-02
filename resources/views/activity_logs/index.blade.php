@@ -75,6 +75,7 @@
                                     <th width="140">Waktu</th>
                                     <th width="200">User</th>
                                     <th width="100" class="text-center">Aksi</th>
+                                    <th width="80" class="text-center">Durasi</th>
                                     <th width="150">Model</th>
                                     <th>Deskripsi</th>
                                     <th width="80" class="text-center">Detail</th>
@@ -110,6 +111,19 @@
                                             <span class="badge bg-danger"><i class="fas fa-trash-alt me-1"></i>Deleted</span>
                                         @endif
                                     </td>
+                                    <td class="text-center">
+                                        @if(!is_null($log->duration_ms))
+                                            @php
+                                                $dur = $log->duration_ms;
+                                                $color = $dur < 100 ? 'secondary' : ($dur < 500 ? 'warning' : 'danger');
+                                            @endphp
+                                            <span class="badge bg-{{ $color }}">
+                                                {{ $dur }} ms
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <span class="badge bg-secondary">{{ class_basename($log->model_type) }}</span>
                                         <div class="text-muted small">ID: {{ $log->model_id }}</div>
@@ -123,7 +137,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5">
+                                    <td colspan="8" class="text-center py-5">
                                         <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
                                         <p class="text-muted mb-0">Tidak ada log aktivitas</p>
                                     </td>

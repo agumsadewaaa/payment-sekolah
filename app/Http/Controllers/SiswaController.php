@@ -22,7 +22,7 @@ class SiswaController extends AppBaseController
     {
         $this->siswaRepository = $siswaRepo;
         // only admin and super-admin may create/update/delete siswa records
-        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy', 'bulkDestroy']);
     }
 
     /**
@@ -130,6 +130,29 @@ class SiswaController extends AppBaseController
         Flash::success('Siswa deleted successfully.');
 
         return redirect(route('siswas.index'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            Flash::error('Tidak ada data yang dipilih.');
+            return redirect()->back();
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $siswa = $this->siswaRepository->find($id);
+            if ($siswa) {
+                $this->siswaRepository->delete($id);
+                $count++;
+            }
+        }
+
+        Flash::success($count . ' data siswa berhasil dihapus.');
+
+        return redirect()->back();
     }
 
     public function getSiswaByKelas($kelas)

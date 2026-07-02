@@ -3,6 +3,8 @@
         <table id="example3" class="display min-w850">
             <thead>
             <tr>
+                <th width="50"><input type="checkbox" id="select-all"></th>
+                <th>No</th>
                 <th>Tanggal</th>
                 <th>Catatan</th>
                 <th>Tipe</th>
@@ -14,6 +16,8 @@
             <tbody>
             @foreach($kasSekolahs as $kasSekolah)
                 <tr>
+                    <td><input type="checkbox" class="row-checkbox" value="{{ $kasSekolah->id }}"></td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ \Carbon\Carbon::parse($kasSekolah->tanggal)->translatedFormat('d M Y H:i:s') }}</td>
                     <td>{{ $kasSekolah->catatan }}</td>
                     <td>

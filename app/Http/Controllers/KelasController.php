@@ -18,7 +18,7 @@ class KelasController extends AppBaseController
     {
         $this->kelasRepository = $kelasRepo;
         // only admin and super-admin can create/update/delete kelas
-        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy', 'bulkDestroy']);
     }
 
     /**
@@ -49,8 +49,8 @@ class KelasController extends AppBaseController
 
         $kelas = $this->kelasRepository->create($input);
 
-        // Auto-create kelas=0 (Lulus) untuk jurusan ini jika belum ada
-        if ($kelas && $kelas->kelas != '0') {
+        // Auto-create kelas=0 (Lulus) untuk jurusan ini hanya ketika kelas 12 dibuat
+        if ($kelas && $kelas->kelas == '12') {
             $existingLulus = \App\Models\Kelas::where('kelas', '0')
                 ->where('jurusan', $kelas->jurusan)
                 ->first();
@@ -166,6 +166,29 @@ class KelasController extends AppBaseController
         Flash::success('Kelas deleted successfully.');
 
         return redirect(route('kelas.index'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            Flash::error('Tidak ada data yang dipilih.');
+            return redirect()->back();
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $kelas = $this->kelasRepository->find($id);
+            if ($kelas && $kelas->kelas !== '0') {
+                $this->kelasRepository->delete($id);
+                $count++;
+            }
+        }
+
+        Flash::success($count . ' data kelas berhasil dihapus.');
+
+        return redirect()->back();
     }
 
     public function getJurusan($kelas)

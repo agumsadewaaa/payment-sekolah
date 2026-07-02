@@ -137,4 +137,28 @@ class UserController extends Controller
         Flash::success('User berhasil dihapus.');
         return redirect()->route('users.index');
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            Flash::error('Tidak ada data yang dipilih.');
+            return redirect()->back();
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            if ($id == auth()->id()) continue;
+            $user = User::find($id);
+            if ($user) {
+                $user->delete();
+                $count++;
+            }
+        }
+
+        Flash::success($count . ' data user berhasil dihapus.');
+
+        return redirect()->back();
+    }
 }

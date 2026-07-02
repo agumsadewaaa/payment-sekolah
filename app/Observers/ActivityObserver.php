@@ -10,17 +10,20 @@ class ActivityObserver
     public function created($model)
     {
         $user = Auth::user();
-        // only log if action triggered by an authenticated admin or super-admin
         if (! $user || ! method_exists($user, 'hasRole') || ! ($user->hasRole('admin') || $user->hasRole('super-admin'))) {
             return;
         }
+
+        $start = microtime(true);
 
         $modelType = get_class($model);
         $modelId = $model->getKey();
 
         $description = sprintf("%s created %s id=%s", $user->name ?? "user:$user->id", $modelType, $modelId);
 
-        ActivityLogger::log('created', $user, $modelType, $modelId, null, $model->toArray(), $description);
+        $durationMs = (int) ((microtime(true) - $start) * 1000);
+
+        ActivityLogger::log('created', $user, $modelType, $modelId, null, $model->toArray(), $description, $durationMs);
     }
 
     public function updated($model)
@@ -30,6 +33,8 @@ class ActivityObserver
             return;
         }
 
+        $start = microtime(true);
+
         $modelType = get_class($model);
         $modelId = $model->getKey();
 
@@ -38,7 +43,9 @@ class ActivityObserver
 
         $description = sprintf("%s updated %s id=%s — changed fields: %s", $user->name ?? "user:$user->id", $modelType, $modelId, implode(', ', array_keys($changes)));
 
-        ActivityLogger::log('updated', $user, $modelType, $modelId, $old, $model->toArray(), $description);
+        $durationMs = (int) ((microtime(true) - $start) * 1000);
+
+        ActivityLogger::log('updated', $user, $modelType, $modelId, $old, $model->toArray(), $description, $durationMs);
     }
 
     public function deleted($model)
@@ -48,11 +55,15 @@ class ActivityObserver
             return;
         }
 
+        $start = microtime(true);
+
         $modelType = get_class($model);
         $modelId = $model->getKey();
 
         $description = sprintf("%s deleted %s id=%s", $user->name ?? "user:$user->id", $modelType, $modelId);
 
-        ActivityLogger::log('deleted', $user, $modelType, $modelId, $model->toArray(), null, $description);
+        $durationMs = (int) ((microtime(true) - $start) * 1000);
+
+        ActivityLogger::log('deleted', $user, $modelType, $modelId, $model->toArray(), null, $description, $durationMs);
     }
 }

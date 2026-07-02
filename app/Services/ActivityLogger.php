@@ -17,9 +17,10 @@ class ActivityLogger
      * @param array|null $oldValues
      * @param array|null $newValues
      * @param string|null $description
+     * @param int|null $durationMs
      * @return ActivityLog
      */
-    public static function log(string $action, $user = null, ?string $modelType = null, $modelId = null, ?array $oldValues = null, ?array $newValues = null, ?string $description = null)
+    public static function log(string $action, $user = null, ?string $modelType = null, $modelId = null, ?array $oldValues = null, ?array $newValues = null, ?string $description = null, ?int $durationMs = null)
     {
         $userId = $user ? ($user->id ?? null) : (Auth::check() ? Auth::id() : null);
 
@@ -31,6 +32,7 @@ class ActivityLogger
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'description' => $description,
+            'duration_ms' => $durationMs,
         ]);
     }
 }

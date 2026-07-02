@@ -18,7 +18,7 @@ class TagihanController extends AppBaseController
     {
         $this->tagihanRepository = $tagihanRepo;
         // only admin and super-admin can manage tagihan (create / update / destroy)
-        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy', 'bulkDestroy']);
     }
 
     /**
@@ -130,5 +130,28 @@ class TagihanController extends AppBaseController
         Flash::success('Tagihan deleted successfully.');
 
         return redirect(route('tagihans.index'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            Flash::error('Tidak ada data yang dipilih.');
+            return redirect()->back();
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $tagihan = $this->tagihanRepository->find($id);
+            if ($tagihan) {
+                $this->tagihanRepository->delete($id);
+                $count++;
+            }
+        }
+
+        Flash::success($count . ' data tagihan berhasil dihapus.');
+
+        return redirect()->back();
     }
 }

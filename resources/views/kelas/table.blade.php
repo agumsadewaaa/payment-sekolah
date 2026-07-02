@@ -3,6 +3,8 @@
         <table id="example3" class="display min-w850">
             <thead>
             <tr>
+                <th width="50"><input type="checkbox" id="select-all"></th>
+                <th>No</th>
                 <th>Kode</th>
                 <th>Kelas</th>
                 <th>Jurusan</th>
@@ -12,6 +14,8 @@
             <tbody>
             @foreach($kelass as $kelas)
                 <tr>
+                    <td><input type="checkbox" class="row-checkbox" value="{{ $kelas->id }}"></td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $kelas->kode }}</td>
                     <td>{{ $kelas->kelas }}</td>
                     <td>{{ $kelas->jurusan }}</td>

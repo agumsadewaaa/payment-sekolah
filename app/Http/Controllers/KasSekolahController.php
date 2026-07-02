@@ -22,7 +22,7 @@ class KasSekolahController extends AppBaseController
     {
         $this->kasSekolahRepository = $kasSekolahRepo;
         // only admin and super-admin may create / edit / delete kas sekolah
-        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('role:admin|super-admin')->only(['create', 'store', 'edit', 'update', 'destroy', 'bulkDestroy']);
     }
 
     /**
@@ -441,5 +441,28 @@ class KasSekolahController extends AppBaseController
         Flash::success('Kas Sekolah deleted successfully.');
 
         return redirect(route('kas-sekolahs.index'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            Flash::error('Tidak ada data yang dipilih.');
+            return redirect()->back();
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $kas = $this->kasSekolahRepository->find($id);
+            if ($kas) {
+                $this->kasSekolahRepository->delete($id);
+                $count++;
+            }
+        }
+
+        Flash::success($count . ' data kas sekolah berhasil dihapus.');
+
+        return redirect()->back();
     }
 }

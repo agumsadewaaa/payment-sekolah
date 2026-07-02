@@ -59,6 +59,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-6">
+                            <div class="mb-0">
+                                <strong class="text-muted small">Durasi</strong>
+                                <p class="mb-0 small">
+                                    @if(!is_null($log->duration_ms))
+                                        @php
+                                            $dur = $log->duration_ms;
+                                            $color = $dur < 100 ? 'secondary' : ($dur < 500 ? 'warning' : 'danger');
+                                        @endphp
+                                        <span class="badge bg-{{ $color }}">{{ $dur }} ms</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -52,6 +52,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     
+    // Bulk delete routes (must be before resource routes)
+    Route::post('/siswas/bulk-delete', [App\Http\Controllers\SiswaController::class, 'bulkDestroy'])->name('siswas.bulk-delete');
+    Route::post('/kelas/bulk-delete', [App\Http\Controllers\KelasController::class, 'bulkDestroy'])->name('kelas.bulk-delete');
+    Route::post('/tagihans/bulk-delete', [App\Http\Controllers\TagihanController::class, 'bulkDestroy'])->name('tagihans.bulk-delete');
+    Route::post('/kas-sekolahs/bulk-delete', [App\Http\Controllers\KasSekolahController::class, 'bulkDestroy'])->name('kas-sekolahs.bulk-delete');
+
     Route::resource('kas-sekolahs', App\Http\Controllers\KasSekolahController::class);
     Route::resource('siswas', App\Http\Controllers\SiswaController::class);
     Route::resource('kelas', App\Http\Controllers\KelasController::class);
@@ -77,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/import-siswa', [AdminController::class, 'importSiswa'])->name('admin.import-siswa')->middleware('role:admin|super-admin');
 
     // super-admin only area
+    Route::post('/users/bulk-delete', [App\Http\Controllers\UserController::class, 'bulkDestroy'])->name('users.bulk-delete')->middleware('role:super-admin');
     Route::resource('users', App\Http\Controllers\UserController::class)->middleware('role:super-admin');
     Route::resource('activity-logs', App\Http\Controllers\ActivityLogController::class)->only(['index', 'show'])->middleware('role:super-admin');
 });
